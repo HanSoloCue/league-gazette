@@ -238,10 +238,8 @@ footer{margin-top:36px;border-top:4px double var(--ink);padding-top:8px;font-fam
   <div class="plate" id="plate">The League Gazette</div>
   <div class="ribbon" id="ribbon"><span>Loading</span></div>
   <form class="controls" id="controls">
-    <label for="league-id">League ID</label>
-    <input id="league-id" inputmode="numeric" autocomplete="off" placeholder="Sleeper league ID">
-    <select id="week" aria-label="Week"></select>
-    <button class="btn" type="submit">Print it</button>
+    <label for="week">Edition</label>
+    <select id="week"></select>
   </form>
   <div id="notice" hidden></div>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
@@ -918,7 +916,7 @@ async function print(leagueId, week){
   const job=++running;
   if (!leagueId){
     const d=sampleData(week); fillWeeks(d.maxWeek,d.week); render(buildModel(d));
-    notice(`<strong>Sample edition.</strong> Every team and player here is made up, and photos appear once a real league is loaded. Enter your Sleeper league ID and press <b>Print it</b>. The ID is the long number in your league's address on sleeper.com.`);
+    notice(`<strong>Sample edition.</strong> Every team and player here is made up, and photos appear once a real league is loaded. Set your Sleeper league ID in the settings at the top of this file's script.`);
     return;
   }
   $("#edition").innerHTML=`<div class="status">Pulling Week ${week||""} from Sleeper and setting type…</div>`;
@@ -937,15 +935,14 @@ async function print(leagueId, week){
     const d=sampleData(); fillWeeks(d.maxWeek,d.week); render(buildModel(d));
     notice(e instanceof TypeError
       ? `<strong>Couldn't reach Sleeper from here.</strong> This preview is sandboxed, so it's showing a made-up sample league. Open the page from your own host (Netlify, GitHub Pages) or straight from a computer's browser to load your league.`
-      : `<strong>That didn't work.</strong> ${esc(e.message)} Check the league ID and try again. Showing the sample edition for now.`);
+      : `<strong>That didn't work.</strong> ${esc(e.message)} Try reloading the page in a minute. Showing the sample edition for now.`);
   }
 }
 buildTabs();
 const params=new URLSearchParams(location.search);
 const initialId=params.get("league")||CONFIG.leagueId||store.get("gazette_league")||"";
-$("#league-id").value=initialId;
-$("#controls").addEventListener("submit", e=>{ e.preventDefault(); const id=$("#league-id").value.trim(); print(id, id===(store.get("gazette_league")||"") ? parseInt($("#week").value,10) : null); });
-$("#week").addEventListener("change", ()=>print($("#league-id").value.trim(), parseInt($("#week").value,10)));
+$("#controls").addEventListener("submit", e=>e.preventDefault());
+$("#week").addEventListener("change", ()=>print(initialId, parseInt($("#week").value,10)));
 print(initialId, parseInt(params.get("week"),10)||null);
 })();
 </script>
