@@ -1,0 +1,951 @@
+<title>League Gazette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Abril+Fatface&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: an 1890s broadsheet. Blackletter nameplate, double rules, column rules, and one "page" shown at a time behind a tab rail. */
+:root{
+  --desk:#ddd6c4; --sheet:#f3eee0; --ink:#1c1a16; --ink-2:#5c564a; --rule:#b3aa95; --spot:#9b2b1c; --gold:#86690f; --good:#2e6a35; --tint:#e7dfca; --card:#f8f4ea;
+  --f-plate:"UnifrakturMaguntia","Old English Text MT",Georgia,serif;
+  --f-fat:"Abril Fatface","Bodoni 72","Didot",Georgia,serif;
+  --f-head:"Old Standard TT","Bodoni 72",Georgia,serif;
+  --f-body:"Libre Caslon Text","Baskerville",Georgia,serif;
+  --f-agate:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#0c0b09; --sheet:#1a1814; --ink:#ebe4d2; --ink-2:#a69e8c; --rule:#3f3b31; --spot:#e27a63; --gold:#d6b552; --good:#82c27d; --tint:#25221b; --card:#201d18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#0c0b09; --sheet:#1a1814; --ink:#ebe4d2; --ink-2:#a69e8c; --rule:#3f3b31; --spot:#e27a63; --gold:#d6b552; --good:#82c27d; --tint:#25221b; --card:#201d18; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:12px;padding-block:16px 48px}
+.paper{max-width:1140px;margin:0 auto;background:var(--sheet);padding:18px clamp(14px,3.2vw,40px) 34px;position:relative;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  box-shadow:0 2px 0 var(--rule),0 12px 30px -18px rgba(0,0,0,.45)}
+a{color:var(--spot)}
+button,input,select{font:inherit}
+:focus-visible{outline:2px solid var(--spot);outline-offset:2px}
+
+/* ---- Nameplate ---- */
+.ears{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;font-family:var(--f-head);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.ear{border:1px solid var(--ink);padding:4px 8px;text-align:center;line-height:1.25;max-width:12em}
+.ears .ear:last-child{justify-self:end}
+.motto{font-style:italic;text-transform:none;letter-spacing:.02em;font-size:.95rem;text-align:center}
+.plate{font-family:var(--f-plate);font-weight:400;font-size:clamp(2.5rem,9.5vw,6rem);line-height:1;text-align:center;margin:.12em 0 .08em;text-wrap:balance}
+.ribbon{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;border-top:4px double var(--ink);border-bottom:1px solid var(--ink);padding:5px 2px;font-family:var(--f-head);font-weight:700;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase}
+.ribbon span:not(:last-child)::after{content:" ✦";color:var(--ink-2);margin-left:14px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:10px 0 0;font-family:var(--f-head);font-size:.85rem}
+.controls label{letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.controls input,.controls select{background:var(--card);color:var(--ink);border:1px solid var(--rule);padding:4px 8px;font-family:var(--f-agate);font-size:1rem}
+.controls input{width:12em}
+.btn{background:var(--ink);color:var(--sheet);border:0;padding:5px 14px;font-family:var(--f-head);font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.btn:hover{background:var(--spot)}
+.notice{margin:12px 0 0;padding:10px 14px;border:1px solid var(--ink);outline:1px solid var(--ink);outline-offset:-5px;background:var(--tint);font-size:.95rem}
+.notice strong{font-family:var(--f-head);letter-spacing:.08em;text-transform:uppercase}
+
+/* ---- Tabs ---- */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--sheet);display:flex;gap:0;overflow-x:auto;scrollbar-width:none;border-bottom:2px solid var(--ink);margin:14px calc(-1*clamp(14px,3.2vw,40px)) 0;padding:0 clamp(14px,3.2vw,40px)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 14px 8px;font-family:var(--f-head);font-weight:700;font-size:.92rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--spot);border-bottom-color:var(--spot)}
+.tab:hover{color:var(--spot)}
+.page{padding-top:18px}
+.status{font-family:var(--f-head);font-style:italic;color:var(--ink-2);padding:50px 0;text-align:center}
+
+/* ---- Type ---- */
+.kicker{font-family:var(--f-head);font-weight:700;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--spot)}
+h1,h2,h3,h4{margin:0;font-weight:400;text-wrap:balance}
+.lead-hed{font-family:var(--f-fat);font-size:clamp(2.1rem,6vw,3.9rem);line-height:1.02;margin:.1em 0 .15em}
+.deck{font-family:var(--f-head);font-style:italic;font-size:1.2rem;line-height:1.35;color:var(--ink-2);margin:0 0 .6em;text-wrap:balance}
+.byline{font-family:var(--f-head);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:3px 0;margin:0 0 .9em;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.body p{margin:0 0 .8em}
+.dropcap::first-letter{font-family:var(--f-fat);float:left;font-size:3.7em;line-height:.82;padding:6px 8px 0 0;color:var(--ink)}
+.banner{display:flex;align-items:center;gap:14px;margin:30px 0 14px}
+.banner::before,.banner::after{content:"";flex:1;border-top:4px double var(--ink)}
+.banner h2{font-family:var(--f-fat);font-size:clamp(1.5rem,4vw,2.1rem);text-align:center;line-height:1.05}
+.sub{font-family:var(--f-head);font-style:italic;color:var(--ink-2);text-align:center;margin:-6px 0 16px}
+.label{font-family:var(--f-head);font-weight:700;font-size:.95rem;letter-spacing:.16em;text-transform:uppercase;color:var(--spot);border-bottom:2px solid var(--ink);padding-bottom:5px;margin:0 0 10px}
+.fist{font-family:var(--f-head);font-style:italic;color:var(--ink-2);margin:10px 0 0}
+.fist button{background:none;border:0;padding:0;color:var(--spot);font:inherit;text-decoration:underline;cursor:pointer}
+
+/* ---- Photos (newsprint halftone) ---- */
+.ph{position:relative;display:inline-grid;place-items:center;overflow:hidden;background:var(--tint);color:var(--ink-2);font-family:var(--f-fat);flex:none;border:2px solid var(--ink)}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.12) brightness(1.03) sepia(.18)}
+.ph.logo img{object-fit:contain;padding:12%}
+.ph::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(28,26,22,.22) 30%,transparent 32%) 0 0/3px 3px;mix-blend-mode:multiply;pointer-events:none;opacity:.55}
+.ph.round{border-radius:50%}
+.ph.xs{width:30px;height:30px;font-size:.8rem;border-width:1px}
+.ph.sm{width:46px;height:46px;font-size:1rem}
+.ph.md{width:84px;height:84px;font-size:1.6rem}
+.ph.lg{width:100%;aspect-ratio:4/3;max-width:100%;font-size:3rem;border-width:1px}
+.ph.nophoto::after{display:none}
+figure{margin:0}
+.lead-photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin:0 0 6px}
+figcaption{font-family:var(--f-agate);font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--rule);padding:4px 0 6px;margin-bottom:12px}
+
+/* ---- Front page ---- */
+.front{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:0}
+.front > .main{padding-right:26px;border-right:1px solid var(--ink);min-width:0}
+.front > .side{padding-left:22px;min-width:0;display:flex;flex-direction:column;gap:24px}
+.lead .body{columns:2 16em;column-gap:26px;column-rule:1px solid var(--rule)}
+.numbers{border-top:4px double var(--ink);border-bottom:1px solid var(--ink)}
+.numbers h3{font-family:var(--f-head);font-style:italic;font-weight:700;font-size:1.25rem;text-align:center;padding:8px 0;border-bottom:1px solid var(--ink)}
+.numgrid{display:grid;grid-template-columns:1fr 1fr}
+.num{padding:10px 8px;text-align:center;border-bottom:1px dotted var(--rule)}
+.num:nth-child(odd){border-right:1px dotted var(--rule)}
+.num .k{font-family:var(--f-head);font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.num .v{font-family:var(--f-fat);font-size:1.75rem;line-height:1.1;font-variant-numeric:lining-nums}
+.num .v small{font-family:var(--f-head);font-size:.7rem;letter-spacing:.1em;margin-left:3px}
+.num .w{font-family:var(--f-head);font-style:italic;font-size:.88rem;color:var(--ink-2);line-height:1.3}
+.num.bad .v{color:var(--spot)}
+.mini td{padding:6px 4px}
+.briefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;border-top:1px solid var(--ink);margin-top:22px}
+.brief{padding:12px 16px 14px 0;border-bottom:1px solid var(--rule);min-width:0}
+.brief h4{font-family:var(--f-head);font-weight:700;font-size:1.15rem;line-height:1.2;margin:.2em 0 .25em}
+.brief p{margin:0;font-size:.95rem}
+.thisweek{list-style:none;margin:0;padding:0}
+.thisweek li{padding:12px 0;border-bottom:1px solid var(--rule)}
+.thisweek .hed{font-family:var(--f-head);font-weight:700;font-size:1.2rem;text-transform:uppercase;line-height:1.15}
+.thisweek .dk{font-family:var(--f-head);font-style:italic;color:var(--spot);margin:2px 0}
+.thisweek .ln{font-family:var(--f-agate);font-size:1.05rem;font-variant-numeric:tabular-nums}
+
+/* ---- Agate tables ---- */
+.tbl-wrap{overflow-x:auto}
+table.agate{width:100%;border-collapse:collapse;font-family:var(--f-agate);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.agate th{font-family:var(--f-head);font-weight:700;text-align:right;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--tint);padding:6px}
+.agate td{text-align:right;padding:7px 6px;border-bottom:1px solid var(--rule);white-space:nowrap;vertical-align:middle}
+.agate .l{text-align:left}
+.teamcell{display:flex;align-items:center;gap:8px;white-space:normal;min-width:10em;font-family:var(--f-body);font-size:.98rem}
+.up{color:var(--good)}.dn{color:var(--spot)}.eq{color:var(--ink-2)}
+
+/* ---- Honor roll / detention ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.pcard{background:var(--card);border:1px solid var(--rule);border-top:5px solid var(--gold);padding:14px 14px 16px;text-align:center;position:relative;min-width:0}
+.pcard.det{border-top-color:var(--spot)}
+.rank{position:absolute;top:10px;left:10px;width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--sheet);font-family:var(--f-fat);display:grid;place-items:center;font-size:.95rem}
+.det .rank{background:var(--spot)}
+.pname{font-family:var(--f-head);font-weight:700;font-size:1.15rem;line-height:1.2;margin-top:8px}
+.pos{display:inline-block;background:var(--ink);color:var(--sheet);font-family:var(--f-agate);font-weight:700;font-size:.72rem;letter-spacing:.06em;padding:1px 5px;vertical-align:2px;margin-left:4px}
+.pteam{font-family:var(--f-head);font-weight:700;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-top:2px}
+.big{font-family:var(--f-fat);font-size:2.2rem;line-height:1.15;color:var(--gold);font-variant-numeric:lining-nums}
+.det .big{color:var(--spot)}
+.bar{position:relative;height:9px;background:var(--tint);border-radius:5px;margin:6px 4px 4px}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--gold)}
+.det .bar i{background:var(--spot)}
+.bar b{position:absolute;top:-5px;bottom:-5px;width:3px;background:var(--ink);transform:translateX(-50%)}
+.cap{font-family:var(--f-head);font-size:.92rem;color:var(--ink-2)}
+
+/* ---- Games ---- */
+.game{border-top:4px double var(--ink);padding:14px 0 18px}
+.game h3{font-family:var(--f-head);font-weight:700;font-size:clamp(1.35rem,3.2vw,1.8rem);text-transform:uppercase;line-height:1.1;margin:.15em 0}
+.game .dk{font-family:var(--f-head);font-style:italic;color:var(--spot);font-size:1.1rem;margin:0 0 10px}
+.scoreline{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;margin:8px 0 12px;padding:10px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.side-t{display:flex;align-items:center;gap:10px;min-width:0}
+.side-t.r{flex-direction:row-reverse;text-align:right}
+.side-t .nm{font-family:var(--f-head);font-weight:700;line-height:1.2;min-width:0;overflow-wrap:anywhere}
+.side-t .sc{font-family:var(--f-fat);font-size:1.6rem;font-variant-numeric:lining-nums}
+.side-t.lose .sc,.side-t.lose .nm{color:var(--ink-2)}
+.vs{font-family:var(--f-head);font-style:italic;color:var(--ink-2)}
+.game .body{columns:2 18em;column-gap:26px;column-rule:1px solid var(--rule)}
+details.box{margin-top:6px}
+details.box summary{cursor:pointer;font-family:var(--f-head);font-weight:700;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--spot)}
+.boxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 26px;margin-top:8px}
+.boxgrid td.slot{color:var(--ink-2);width:3em;text-align:left}
+.boxgrid tr.bench td{color:var(--ink-2);font-style:italic}
+.boxgrid tr.tot td{font-weight:700;border-bottom:2px solid var(--ink)}
+
+/* ---- Awards ---- */
+.awcard{background:var(--card);border:1px solid var(--rule);padding:16px 18px 18px;margin-bottom:16px}
+.awcard .title{font-family:var(--f-head);font-weight:700;font-size:1.15rem;letter-spacing:.1em;text-transform:uppercase;color:var(--spot);border-bottom:1px solid var(--rule);padding-bottom:4px}
+.awcard .why{font-family:var(--f-head);font-style:italic;color:var(--ink-2);margin:4px 0 12px}
+.awrow{display:flex;gap:16px;align-items:center}
+.awrow .ph{border-radius:4px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:6px}
+.stat .k{font-family:var(--f-head);font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.stat .v{font-family:var(--f-fat);font-size:1.6rem;line-height:1.1;font-variant-numeric:lining-nums}
+.stat .v.red{color:var(--spot)}.stat .v.gold{color:var(--gold)}
+.awcard p{margin:12px 0 0}
+.teamawards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));border-top:1px solid var(--ink)}
+.ta{padding:12px 14px;border-bottom:1px solid var(--rule);border-right:1px dotted var(--rule);min-width:0}
+.ta .nm{font-family:var(--f-head);font-weight:700;font-size:1.08rem;line-height:1.2;margin:.15em 0}
+.ta .fig{font-family:var(--f-fat);font-size:1.5rem;color:var(--spot);font-variant-numeric:lining-nums}
+.ta p{margin:0;font-size:.9rem;color:var(--ink-2)}
+
+/* ---- Rankings ---- */
+.prow{display:grid;grid-template-columns:2.2em auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.prow .rk{font-family:var(--f-fat);font-size:1.7rem;text-align:center;line-height:1}
+.prow .nm{font-family:var(--f-head);font-weight:700;font-size:1.12rem;line-height:1.2}
+.prow .meta{font-family:var(--f-agate);font-size:.98rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.prow .mv{font-family:var(--f-agate);font-weight:700;font-size:1.05rem;text-align:right}
+.prow .blurb{grid-column:3/-1;font-size:.95rem}
+
+/* ---- Back page ---- */
+.obit{display:flex;gap:14px;padding:14px 0;border-bottom:2px solid var(--ink)}
+.obit .ph{border-radius:2px}
+.obit h4{font-family:var(--f-head);font-weight:700;font-size:1.3rem}
+.obit .dates{font-family:var(--f-head);font-style:italic;color:var(--ink-2);font-size:.95rem}
+.obit p{margin:.3em 0 0}
+.obit .cross{font-family:var(--f-head);color:var(--ink-2);margin-right:4px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;align-items:center;padding:11px 0;border-bottom:1px dotted var(--rule)}
+.rec .k{font-family:var(--f-head);font-weight:700;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase}
+.rec .who{font-size:.98rem}
+.rec .who b{font-family:var(--f-head)}
+.rec .v{grid-row:1/3;grid-column:2;font-family:var(--f-fat);font-size:1.9rem;color:var(--spot);font-variant-numeric:lining-nums}
+.stamp{display:inline-block;margin-left:8px;background:var(--spot);color:var(--sheet);font-family:var(--f-head);font-weight:700;font-size:.66rem;letter-spacing:.16em;padding:1px 7px;vertical-align:2px;transform:rotate(-2deg)}
+.preview{border-bottom:1px solid var(--rule);padding:16px 0}
+.pv{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;text-align:center}
+.pv .t{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.pv .t .nm{font-family:var(--f-head);font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.pv .t .pj{font-family:var(--f-agate);color:var(--ink-2)}
+.pv .spread{font-family:var(--f-fat);font-size:2.3rem;color:var(--spot);line-height:1}
+.pbar{height:10px;background:var(--tint);margin:10px 0 8px;position:relative}
+.pbar i{position:absolute;top:0;bottom:0;background:var(--spot)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid var(--ink);padding:1px 8px;font-family:var(--f-head);font-weight:700;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+.chip.solid{background:var(--ink);color:var(--sheet)}
+.trade{padding:12px 0 16px;border-bottom:2px solid var(--ink)}
+.trade .gets b{font-family:var(--f-head);font-size:1.12rem}
+.trade .gets i{font-family:var(--f-head);color:var(--ink-2)}
+.trade ul{margin:4px 0 0;padding-left:1.2em}
+.swap{color:var(--spot);font-size:1.5rem;line-height:1;margin:6px 0}
+.tx{list-style:none;margin:0;padding:0}
+.tx li{padding:10px 4px;border-bottom:1px dotted var(--rule)}
+.tx .tag{display:block;font-family:var(--f-head);font-weight:700;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.tx .tag.denied{color:var(--spot)}
+.tx li.denied .what{color:var(--ink-2)}
+.tx b{font-family:var(--f-head)}
+.pt{font-family:var(--f-agate);font-size:.9rem;color:var(--ink-2);letter-spacing:.03em}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 34px}
+.grid2 > *{min-width:0}
+.empty{font-style:italic;color:var(--ink-2)}
+footer{margin-top:36px;border-top:4px double var(--ink);padding-top:8px;font-family:var(--f-head);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+
+@media (max-width:820px){
+  .front{grid-template-columns:minmax(0,1fr)}
+  .front > .main{padding-right:0;border-right:0}
+  .front > .side{padding-left:0;margin-top:22px}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .ears{grid-template-columns:1fr 1fr}.motto{display:none}
+}
+@media (max-width:480px){
+  .side-t{flex-direction:column;text-align:center}.side-t.r{flex-direction:column;text-align:center}
+  .ph.md{width:68px;height:68px}
+}
+@media (prefers-reduced-motion:no-preference){.page{animation:ink .3s ease-out both}@keyframes ink{from{opacity:.35}to{opacity:1}}}
+</style>
+
+<div class="paper">
+  <div class="ears"><div class="ear" id="ear-l">Fantasy Football</div><div class="motto">"All the scores that are fit to print"</div><div class="ear" id="ear-r">Final Edition</div></div>
+  <div class="plate" id="plate">The League Gazette</div>
+  <div class="ribbon" id="ribbon"><span>Loading</span></div>
+  <form class="controls" id="controls">
+    <label for="league-id">League ID</label>
+    <input id="league-id" inputmode="numeric" autocomplete="off" placeholder="Sleeper league ID">
+    <select id="week" aria-label="Week"></select>
+    <button class="btn" type="submit">Print it</button>
+  </form>
+  <div id="notice" hidden></div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  <main id="edition"><div class="status">Setting type…</div></main>
+  <footer><span>Figures from Sleeper · Stories set automatically from your league's results</span><span id="foot-r"></span></footer>
+</div>
+
+<script type="application/json" id="snapshot">{"state":{"season":"2026","week":5,"season_type":"regular","season_start_date":"2026-09-09"},"league":{"name":"Secret Society of Intense Football Lovers","season":"2026","roster_positions":["QB","RB","RB","WR","WR","TE","FLEX","REC_FLEX","K","DEF","BN","BN","BN","BN","BN","BN"],"scoring_settings":{"rec":1},"settings":{"playoff_week_start":15}},"users":[{"user_id":"619968294362877952","display_name":"TheMan008","avatar":null,"metadata":{"team_name":"Fresh Prince Of Helaire","avatar":"https://sleepercdn.com/uploads/35cce1d82d8cd3582b91d18e825b4f63.jpg"}},{"user_id":"870703966432972800","display_name":"swagseal","avatar":"e7af4deab0289b4f5505646424895246","metadata":{"team_name":"McAnus"}},{"user_id":"1002715717806006272","display_name":"GINEVRAdBENCHME","avatar":"646ac40624413336b9fafe9ceaa6ff84","metadata":{"team_name":"PUNISHEDFUNK A MAN DENIED","avatar":"https://sleepercdn.com/uploads/646ac40624413336b9fafe9ceaa6ff84.jpg"}},{"user_id":"1004974189968781312","display_name":"jpduff","avatar":"b3338675f635c2c1f42b469621d38ec6","metadata":{"team_name":"RIP Charlie","avatar":"https://sleepercdn.com/uploads/1c1b338ebf15975e51af2e84c3a9b71d.jpg"}},{"user_id":"1038560198446718976","display_name":"calebflynn1221","avatar":"15d7cf259bc30eab8f6120f45f652fb6","metadata":{"team_name":"Smack That","avatar":"https://sleepercdn.com/uploads/d9e9ca1b817b7945a14e79563d5634a1"}},{"user_id":"1250840293255675904","display_name":"cjmin05172025","avatar":"7572250c2fb084c434fed0e82229e183","metadata":{"team_name":"Bubbie’s Means to an End","avatar":"https://sleepercdn.com/uploads/1b7858da5fe81177165d155957a714a4.jpg"}},{"user_id":"1250871970635976704","display_name":"FormanCurtis42","avatar":"7572250c2fb084c434fed0e82229e183","metadata":{"team_name":"Titsburgh Feelers ","avatar":"https://sleepercdn.com/uploads/fa7beeecb0fefbd9546fc0c0e6ceb56a.jpg"}},{"user_id":"1253717697745661952","display_name":"pmosi","avatar":"578c6b253dd7b4bab45382e1af102204","metadata":{"team_name":"No, this is Patrick","avatar":"https://sleepercdn.com/uploads/dfa5ad6cbca9312ffd371eec92cb29df.jpg"}},{"user_id":"1253828685354520576","display_name":"mbyers210","avatar":"578c6b253dd7b4bab45382e1af102204","metadata":{"team_name":"CTESPN","avatar":"https://sleepercdn.com/uploads/45cd2b39cda6d8f62c8afd4ac259d3a4.jpg"}},{"user_id":"1255550404159078400","display_name":"xavipoz","avatar":"578c6b253dd7b4bab45382e1af102204","metadata":{"team_name":"The Star-Spangled Tanners","avatar":"https://sleepercdn.com/uploads/395d281aafd6c9dd4278520a9329272b.jpg"}}],"rosters":[{"roster_id":1,"owner_id":"1250840293255675904"},{"roster_id":2,"owner_id":"1038560198446718976"},{"roster_id":3,"owner_id":"1250871970635976704"},{"roster_id":4,"owner_id":"619968294362877952"},{"roster_id":5,"owner_id":"870703966432972800"},{"roster_id":6,"owner_id":"1253717697745661952"},{"roster_id":7,"owner_id":"1002715717806006272"},{"roster_id":8,"owner_id":"1253828685354520576"},{"roster_id":9,"owner_id":"1004974189968781312"},{"roster_id":10,"owner_id":"1255550404159078400"}],"matchups":{"1":[{"roster_id":1,"matchup_id":4,"points":250.34,"starters":["11560","9509","12527","8137","11620","12518","11584","6819","3451","DAL"],"players_points":{"3451":10.58,"4046":27.2,"5850":0,"6819":15.07,"7594":32.5,"8121":0,"8126":12.65,"8137":8.46,"9509":49.3,"11560":50.75,"11584":29.08,"11620":12.65,"11748":0,"12518":14,"12527":50.82,"13298":13.75,"DAL":9.63}},{"roster_id":2,"matchup_id":2,"points":193.88,"starters":["3294","7588","7543","7547","6794","9484","2133","11631","4227","LAR"],"players_points":{"2133":7.8,"3294":19.05,"4227":7.78,"4892":14.5,"6794":39.9,"7543":22.82,"7547":34.51,"7588":30.82,"8131":39.9,"9484":19.55,"11583":13.53,"11631":9.15,"13281":0,"13296":23.76,"13545":13.78,"DEN":7.71,"LAR":2.5}},{"roster_id":3,"matchup_id":1,"points":262.53,"starters":["4984","12481","6790","9493","12519","8130","8228","5846","11533","LV"],"players_points":{"4199":15,"4984":47,"5846":11.45,"6790":46.69,"6806":7.7,"8130":41.37,"8134":12.99,"8142":16.38,"8228":17.2,"9480":13.54,"9493":20.83,"11533":-1,"12481":23.2,"12519":14.54,"LV":41.25,"PIT":40.05}},{"roster_id":4,"matchup_id":5,"points":152.65,"starters":["5849","6813","8150","6801","8148","10859","8155","10222","12015","LAC"],"players_points":{"2216":22.19,"4037":13.55,"5849":-0.1,"6801":14.58,"6813":37.64,"6820":0,"8136":9.64,"8148":13.22,"8150":22.24,"8155":35.86,"8183":31.2,"10222":6.88,"10859":18.08,"11604":0,"12015":1,"12489":15.34,"LAC":3.25}},{"roster_id":5,"matchup_id":2,"points":332.41,"starters":["6904","9221","13286","7569","9997","5022","8151","7526","12711","MIN"],"players_points":{"1433":0,"5022":37.2,"6904":37.45,"7523":30.85,"7526":1.46,"7569":29.19,"8151":66.22,"9221":58.17,"9997":43.23,"11581":8.4,"11628":8.08,"12501":25.92,"12711":17.02,"13279":10.8,"13286":15.32,"MIN":27.15}},{"roster_id":6,"matchup_id":3,"points":163.15,"starters":["4881","9226","13287","6786","4983","7553","5927","1466","11539","HOU"],"players_points":{"1466":19.62,"3163":20.55,"4351":0,"4881":41.15,"4983":33.18,"5012":16.24,"5045":3.99,"5927":4.8,"6786":19.92,"7553":0,"7567":5.69,"9226":17.17,"9754":4.92,"11539":7.73,"13287":18.08,"HOU":1.5}},{"roster_id":7,"matchup_id":5,"points":155.75,"starters":["12508","12507","7021","7564","8112","10236","10229","12526","2747","NE"],"players_points":{"695":0,"2449":20.11,"2747":9.06,"5872":26.35,"5967":8.35,"7021":5.92,"7564":4.5,"8112":9.31,"8132":16.58,"10229":11.22,"10236":36.4,"11564":16.15,"12507":13.6,"12508":36.3,"12526":16.69,"12529":0,"NE":12.75}},{"roster_id":8,"matchup_id":3,"points":254.59,"starters":["11566","4866","5892","9488","5859","12506","8144","9487","8259","JAX"],"players_points":{"421":7.55,"536":0,"4866":21.14,"5859":8.15,"5892":38.92,"8110":4.92,"8144":47.95,"8259":2,"8408":18.3,"9487":27.9,"9488":41.37,"9756":0,"11566":23.7,"12506":7.58,"12533":20.02,"JAX":35.88}},{"roster_id":9,"matchup_id":1,"points":212.86,"starters":["6770","4034","3198","5947","8146","12517","7611","10232","11792","BAL"],"players_points":{"3198":55.07,"4034":22.68,"4217":5.85,"4950":0,"5947":17.2,"6770":20.9,"7611":23.32,"8146":22.6,"10232":15.42,"11563":1,"11632":18.57,"11792":8.38,"12490":20.93,"12517":0,"12534":40.54,"BAL":27.29}},{"roster_id":10,"matchup_id":4,"points":187.11,"starters":["6797","8138","9224","7525","11635","7002","9500","12514","11786","PHI"],"players_points":{"6797":17.8,"7002":22.01,"7525":13.45,"8138":16.95,"8167":49.07,"9224":27.08,"9230":0,"9500":9.69,"9753":0,"11586":11.8,"11635":26.77,"11786":14.87,"12512":12.07,"12514":16.49,"13417":0,"PHI":22,"SEA":28.95}}],"2":[{"roster_id":1,"matchup_id":5,"points":156.71,"starters":["11560","9509","12527","8137","11620","12518","11584","3214","3451","DAL"],"players_points":{"3214":13.5,"3451":7.82,"4046":41.25,"5850":0,"6819":0,"7594":22.29,"8121":20.42,"8126":2.88,"8137":14.45,"9509":19.78,"11560":11.75,"11584":23.45,"11620":11.77,"11748":0,"12518":22.33,"12527":18.41,"13298":10.36,"DAL":13.45}},{"roster_id":2,"matchup_id":1,"points":261.03,"starters":["3294","7588","7543","7547","6794","9484","2133","8131","4227","LAR"],"players_points":{"2133":58.45,"3294":40,"4227":19.95,"4892":19.2,"6794":14.11,"7543":10.42,"7547":50.45,"7588":12.08,"8131":16.13,"9484":4.81,"11583":3.43,"11631":11.65,"13281":0,"13296":5.92,"13545":10.1,"DEN":21.12,"LAR":34.63}},{"roster_id":3,"matchup_id":2,"points":203.4,"starters":["4984","12481","6790","9493","12519","8130","4199","5846","11533","TB"],"players_points":{"4199":24.5,"4984":56.8,"5846":9.1,"6790":23.01,"8130":29.01,"8134":10.36,"8142":3.19,"8228":17.68,"9480":6.97,"9493":0,"11533":20.79,"12481":13.47,"12519":8.72,"13414":5,"PIT":25.62,"TB":18}},{"roster_id":4,"matchup_id":5,"points":235.13,"starters":["8183","6813","8150","6801","8148","10859","8155","2216","12015","LAC"],"players_points":{"2216":13.81,"4037":15.48,"5849":0,"6801":25.12,"6813":45.6,"6820":0,"8136":23.1,"8148":8.08,"8150":25.35,"8155":24.19,"8183":40.35,"10222":1.77,"10859":27.05,"11604":0,"12015":1.5,"12489":0,"LAC":24.08}},{"roster_id":5,"matchup_id":3,"points":227.06,"starters":["6904","9221","13286","7526","12501","5022","8151","11834","12711","MIN"],"players_points":{"1433":0,"5022":2.62,"6806":7.7,"6904":22.75,"7523":8.6,"7526":36.53,"7569":0,"8151":45.98,"9221":34.18,"9997":0,"11581":10.42,"11628":0,"11834":17.65,"12501":14.92,"12711":4.99,"13279":7.95,"13286":10.98,"MIN":36.46}},{"roster_id":6,"matchup_id":4,"points":204.27,"starters":["4881","9226","13287","6786","4983","7553","5927","1466","11539","HOU"],"players_points":{"1466":41.64,"3163":33.7,"4351":0,"4881":23.6,"4983":-0.2,"5012":20.94,"5045":7.65,"5927":12.69,"6786":51.49,"7553":4.66,"7567":9.37,"9226":24.07,"9754":3.98,"11539":8.31,"13287":11.76,"HOU":26.25}},{"roster_id":7,"matchup_id":4,"points":236.01,"starters":["12508","12507","7021","7564","8112","10236","10229","12526","2747","NE"],"players_points":{"695":0,"2449":26.68,"2747":8.33,"5872":11.34,"5967":15.45,"7021":10.98,"7564":33.44,"8112":13.45,"10229":21.42,"10236":38.02,"11564":13,"12507":31.88,"12508":1.35,"12526":25.69,"12529":22.2,"NE":51.45}},{"roster_id":8,"matchup_id":2,"points":211.16,"starters":["11566","4866","5892","9488","8144","8110","13301","9487","8259","SF"],"players_points":{"421":32.95,"536":0,"4866":4.84,"5859":0,"5892":6.15,"8110":26.97,"8144":32.18,"8259":0,"8408":0,"9487":24.58,"9488":58.95,"9756":5.88,"11566":24.3,"12506":20.36,"12533":10.37,"13301":7.44,"SF":25.75}},{"roster_id":9,"matchup_id":1,"points":153.68,"starters":["9228","4034","3198","11632","8146","12517","7611","10232","11792","BAL"],"players_points":{"3198":28.87,"4034":28.62,"4217":30.01,"4950":0,"5947":6.81,"6770":17.15,"7611":8.56,"8146":21.57,"9228":30.9,"10232":5.42,"11632":1.3,"11792":14.23,"12490":22.04,"12517":2.46,"12534":14.59,"BAL":11.75}},{"roster_id":10,"matchup_id":3,"points":234.4,"starters":["6797","8138","9224","7525","8167","5001","11646","12514","11786","PHI"],"players_points":{"5001":50.14,"6797":5.2,"7525":38.6,"8138":39.62,"8167":18.26,"9224":22.81,"9230":0,"9500":22.23,"9753":0,"11586":20.15,"11635":9.53,"11646":23.04,"11786":8.17,"12512":14.2,"12514":11.31,"13417":0,"PHI":17.25,"SEA":32.25}}],"3":[{"roster_id":1,"matchup_id":5,"points":242.28,"starters":["4046","9509","12527","8137","13346","12518","7594","3214","6650","CAR"],"players_points":{"3214":2.77,"4046":21.65,"5850":0,"6650":15.7,"6819":5.11,"7594":28.06,"8121":13.69,"8137":22.07,"9509":65.57,"11560":0,"11584":13.9,"11620":11.92,"11748":0,"12518":28.06,"12527":22.09,"13298":4.07,"13346":12.31,"CAR":24}},{"roster_id":2,"matchup_id":2,"points":180.07,"starters":["3294","7588","7543","7547","6794","9484","2133","8131","4227","LAR"],"players_points":{"2133":34.53,"3294":30.05,"4227":5.34,"4892":15.45,"6794":8.57,"7543":17.75,"7547":13.87,"7588":30.22,"8131":6.35,"9484":12.35,"11583":0,"11631":2.38,"13281":0,"13296":0,"13545":-0.5,"DEN":26.39,"LAR":21.04}},{"roster_id":3,"matchup_id":3,"points":203.62,"starters":["4984","12481","6790","8134","12519","8130","8228","11624","11533","KC"],"players_points":{"4199":23.68,"4984":19.05,"5846":14.92,"6790":22.77,"8130":30.59,"8134":2.42,"8142":0,"8228":40.64,"9493":0,"11533":11.89,"11624":5.73,"12481":25,"12519":26.53,"13414":3.9,"KC":19,"PIT":11.5}},{"roster_id":4,"matchup_id":4,"points":263.92,"starters":["8183","6813","8150","6801","8148","11604","8155","10859","12015","LAC"],"players_points":{"2216":16.03,"4037":7.3,"5849":16.45,"6801":28.8,"6813":19.72,"6820":0,"8136":16.69,"8148":13.84,"8150":38.77,"8155":15.29,"8183":43.8,"10222":0,"10859":14.12,"11604":46.95,"12015":21.59,"12489":13.86,"LAC":21.04}},{"roster_id":5,"matchup_id":4,"points":278.66,"starters":["6904","9221","8151","9997","12501","7002","13286","7526","12711","MIN"],"players_points":{"1433":0,"5022":0,"6806":10.92,"6904":16.9,"7002":35.2,"7523":25.1,"7526":9.49,"7569":0,"8151":29.96,"9221":60.35,"9997":26.92,"11581":5.78,"11834":10.5,"12487":3.73,"12501":31.18,"12711":14.33,"13286":3.08,"MIN":51.25}},{"roster_id":6,"matchup_id":5,"points":205.68,"starters":["4881","9226","13287","6786","5045","1466","5927","5012","11539","HOU"],"players_points":{"1466":21.43,"3163":28.35,"4351":0,"4881":30.65,"4983":18.61,"5012":10.04,"5045":12.58,"5927":27.65,"6786":31.03,"7553":2.77,"7567":9.04,"9226":3.9,"9754":11.3,"11539":8.3,"13287":35.77,"HOU":24.33}},{"roster_id":7,"matchup_id":3,"points":176.9,"starters":["1166","12507","12529","7564","8112","10236","5967","12526","2747","NE"],"players_points":{"695":0,"1166":24.5,"2449":10.38,"2747":10.57,"5872":27.24,"5967":24.03,"7021":0,"7564":34.18,"8112":46.95,"10229":23.79,"10236":8.2,"11564":3.6,"12507":12.2,"12508":0,"12526":5.27,"12529":6.52,"13337":4.93,"NE":4.48}},{"roster_id":8,"matchup_id":1,"points":195.67,"starters":["421","4866","5892","9488","8144","8110","12533","9487","8259","SF"],"players_points":{"421":30.9,"536":0,"4866":19.09,"5859":0,"5892":11.76,"8110":12.54,"8144":29.26,"8259":10.85,"8408":0,"9487":15.95,"9488":48.54,"9756":32.8,"11566":0,"12506":34.2,"12533":10.78,"13301":4.61,"SF":6}},{"roster_id":9,"matchup_id":1,"points":272.28,"starters":["9228","4034","3198","11632","8146","4217","12490","10232","11792","BAL"],"players_points":{"3198":33.8,"4034":33.86,"4217":39.02,"4950":0,"6770":30.3,"7611":11.36,"8146":38.21,"9228":18.65,"10213":11.92,"10232":34.44,"11632":10.45,"11792":20.53,"12490":27.57,"12517":13.82,"12534":7.7,"BAL":15.75}},{"roster_id":10,"matchup_id":2,"points":200.44,"starters":["12545","8138","9224","11635","8167","5001","11646","7525","11786","SEA"],"players_points":{"5001":10.97,"6797":17.5,"7525":19.1,"8138":39.3,"8167":32.72,"9224":17.28,"9230":0,"9500":20,"9753":0,"11586":5,"11635":16.8,"11646":5.42,"11786":3.5,"12512":18.38,"12514":16.99,"12545":31.35,"SEA":24}}],"4":[{"roster_id":1,"matchup_id":5,"points":321.62,"starters":["4046","9509","12527","8137","12526","12518","7594","13346","12185","CHI"],"players_points":{"3214":21.94,"4046":25.8,"5850":0,"7594":43.83,"8121":28.87,"8137":17.54,"9509":52.31,"11560":0,"11610":17.36,"11620":26.26,"11748":0,"12185":20.44,"12518":17.01,"12526":61.74,"12527":31.61,"13279":34.26,"13346":21.34,"CHI":30}},{"roster_id":2,"matchup_id":3,"points":256.06,"starters":["4943","7588","11435","7547","2133","9484","4035","8131","4227","LAR"],"players_points":{"2133":10.22,"3294":28,"4035":27.83,"4227":6.78,"4943":14.85,"6794":0,"7547":22.14,"7588":39.98,"8131":26.7,"9484":26.26,"11435":40.05,"11583":0,"12495":32,"13281":0,"13296":0,"13545":8.58,"DEN":15,"LAR":41.25}},{"roster_id":3,"matchup_id":4,"points":207.79,"starters":["4984","12481","6790","9493","12519","8130","8228","11624","11533","KC"],"players_points":{"4199":31.73,"4984":22.8,"5846":29.19,"6790":14.41,"8130":18.77,"8134":20.37,"8142":0,"8228":30.53,"9493":40.23,"11533":11.89,"11624":18.07,"12481":15.68,"12519":20.04,"13414":3.6,"KC":15.37,"PIT":14.25}},{"roster_id":4,"matchup_id":2,"points":305.01,"starters":["8183","6813","8150","6801","8148","11604","11576","10859","12015","TB"],"players_points":{"2216":19.84,"4037":12.37,"5849":18.85,"6801":40.6,"6813":36.31,"6820":0,"8136":0,"8148":26.69,"8150":51.36,"8155":0,"8183":31.5,"10859":38.32,"11576":16.88,"11604":34.63,"12015":5.9,"12474":10.4,"12489":27.29,"TB":22.82}},{"roster_id":5,"matchup_id":5,"points":269.36,"starters":["7523","9221","8151","9997","12501","7002","7569","7526","12711","MIN"],"players_points":{"1433":0,"5022":0,"6806":13.2,"6904":13.55,"7002":23.13,"7523":16,"7526":17.13,"7569":42.25,"8151":55.71,"9221":24.97,"9997":37.4,"11834":21.91,"12487":0,"12501":13.88,"12711":8.14,"13286":0,"MIN":30.75}},{"roster_id":6,"matchup_id":3,"points":181.29,"starters":["4881","7567","13287","6786","5045","1466","5012","4983","11539","HOU"],"players_points":{"1466":6.66,"1479":0,"3163":33.4,"4351":0,"4881":25.8,"4983":4.39,"5012":20.5,"5045":2.12,"5927":0,"6786":59.43,"7553":14.93,"7567":12.38,"9754":9.47,"11539":23.14,"13287":13.87,"HOU":13}},{"roster_id":7,"matchup_id":1,"points":162.91,"starters":["11564","12507","12529","7564","8112","10236","11584","5872","2747","ARI"],"players_points":{"695":0,"1166":30.3,"2449":11.48,"2747":4.35,"5872":25.68,"5967":18.91,"7021":0,"7564":7.95,"8112":24.77,"10229":0,"10236":3.08,"11564":32.9,"11584":13.7,"12507":19.73,"12529":9.4,"13337":4.52,"ARI":21.35}},{"roster_id":8,"matchup_id":4,"points":157.67,"starters":["421","4866","5892","9488","8144","12506","12533","9487","3451","CLE"],"players_points":{"421":16.4,"536":0,"3451":20.44,"4866":1.41,"5859":0,"5892":7.72,"8110":8.04,"8144":31.8,"8408":0,"9487":2.93,"9488":20.49,"9756":14.45,"11566":0,"12506":16.5,"12533":12.73,"13301":6.68,"CLE":27.25}},{"roster_id":9,"matchup_id":2,"points":252.34,"starters":["9228","4034","3198","11632","8146","4217","12490","10232","11792","BAL"],"players_points":{"3198":28.52,"4034":23.67,"4217":29.77,"4950":0,"6770":30.8,"7611":26.05,"8146":7.95,"9228":29.15,"10213":13.07,"10232":26.77,"11632":34.68,"11792":25.5,"12490":20.37,"12517":22.17,"12534":47.82,"BAL":25.96}},{"roster_id":10,"matchup_id":1,"points":170.32,"starters":["12545","8138","9224","8167","9500","2505","9486","12514","11786","SEA"],"players_points":{"2505":12.59,"7525":0,"8138":25.73,"8167":11.38,"9224":24.62,"9230":0,"9486":6.57,"9500":5.91,"9753":0,"11586":4.88,"11635":0,"11646":0,"11786":17.87,"12512":31.77,"12514":4.65,"12545":25.2,"13330":0,"SEA":35.8}}],"5":[{"roster_id":1,"matchup_id":3,"points":233.86,"starters":["9758","9509","12527","8137","13279","12518","3214","8121","12185","JAX"],"players_points":{"3214":20.47,"4046":0,"5850":0,"7594":0,"8121":3.96,"8137":41.1,"9509":27.97,"9758":27.1,"11560":0,"11620":8.3,"11748":0,"12185":27.03,"12518":36.37,"12526":0,"12527":18.79,"13279":2.07,"13346":18.31,"JAX":29}},{"roster_id":2,"matchup_id":4,"points":238.55,"starters":["3294","7588","11435","7547","2133","8131","12495","6794","7839","DEN"],"players_points":{"2133":7.77,"3294":17.75,"4035":3.48,"4943":7.8,"6794":23.05,"7547":18.62,"7588":21.12,"7839":7.76,"8131":49.86,"9484":23.8,"11435":22.24,"11583":0,"12495":26.1,"13281":0,"13296":0,"13545":-1.65,"DEN":44.28,"LAR":10.25}},{"roster_id":3,"matchup_id":5,"points":266.08,"starters":["4984","4199","6790","9493","12519","8130","8228","5846","11533","NYJ"],"players_points":{"4199":33.22,"4984":9.05,"5846":6.85,"6790":24.57,"8130":35.2,"8134":2.07,"8228":66.08,"9493":13.52,"11533":6.41,"11624":0,"11628":0,"12481":14.65,"12519":14.43,"13414":3.7,"NYJ":56.75,"PIT":7.25}},{"roster_id":4,"matchup_id":4,"points":198.56,"starters":["8183","6813","8150","6801","8148","11604","11576","10859","12015","CIN"],"players_points":{"2216":38.18,"4037":10.44,"5849":28.4,"6801":6.03,"6813":20.04,"6820":0,"8148":23.03,"8150":8.77,"8155":0,"8183":18.15,"10859":31.74,"11576":32.7,"11577":9.28,"11604":39.32,"12015":-1,"12489":1.9,"CIN":19.78}},{"roster_id":5,"matchup_id":1,"points":264.25,"starters":["7523","9221","6806","9997","7569","7002","12501","7526","12711","MIN"],"players_points":{"1433":0,"5022":18.9,"6806":23.52,"6904":17.35,"7002":10.81,"7523":29,"7526":7.37,"7569":16.77,"8151":0,"9221":63.02,"9997":21,"11630":0,"11834":9.3,"12487":0,"12501":33.97,"12711":17.73,"13286":0,"MIN":41.06}},{"roster_id":6,"matchup_id":5,"points":140.66,"starters":["3163","7567","13287","6786","5045","5012","5927","4983","11539","HOU"],"players_points":{"1466":0,"3163":30.5,"4351":6.65,"4881":0,"4983":0,"5012":10.01,"5045":11.42,"5927":18.19,"6786":3.68,"7553":22.81,"7567":8.49,"8154":5.23,"9754":0,"11539":11.46,"13287":4.4,"HOU":42.51}},{"roster_id":7,"matchup_id":1,"points":190.68,"starters":["1166","12529","11584","5872","8112","10236","12507","3271","2747","NE"],"players_points":{"695":0,"1166":15,"2449":0,"2747":30.3,"3271":6.31,"5872":5,"5967":11.9,"7021":0,"7564":30.45,"8112":30.65,"10229":0,"10236":0,"11564":52.05,"11581":21.12,"11584":56.04,"12507":9.02,"12529":8.86,"NE":29.5}},{"roster_id":8,"matchup_id":3,"points":228.5,"starters":["11566","5892","9511","9488","8144","12506","9500","9487","3451","CLE"],"players_points":{"421":9.15,"536":0,"3451":22.09,"4866":0,"5859":0,"5892":2.2,"8110":9.27,"8144":13.08,"9487":44.69,"9488":34.84,"9500":13.03,"9511":10.35,"9756":0,"11566":45.15,"12506":2.62,"12533":23.9,"CLE":40.45}},{"roster_id":9,"matchup_id":2,"points":262.47,"starters":["6770","4034","3198","11632","8146","4217","12490","10232","11792","BAL"],"players_points":{"3198":35.67,"4034":25.91,"4217":14.04,"4950":0,"6770":34.4,"7611":26.03,"8146":33.6,"9228":0,"10213":10.41,"10232":10.47,"11632":41.37,"11792":20.49,"12490":24.94,"12517":7.27,"12534":0,"BAL":21.58}},{"roster_id":10,"matchup_id":2,"points":217.75,"starters":["3257","8138","9224","8167","12514","5844","12512","11610","11786","SEA"],"players_points":{"3257":32.83,"4993":8.62,"5844":3.43,"7525":0,"8138":20.18,"8167":52.75,"9224":11.88,"9230":0,"9753":0,"11586":8.97,"11610":20.75,"11635":0,"11646":0,"11786":8.91,"12512":13.72,"12514":23.25,"12545":-0.3,"SEA":30.05}}],"6":[{"roster_id":1,"matchup_id":2,"points":0,"starters":["9758","9509","12527","8137","13279","12518","3214","8121","12185","JAX"],"players_points":{"3214":0,"4046":0,"5850":0,"7594":0,"8121":0,"8137":0,"9509":0,"9758":0,"11560":0,"11620":0,"11748":0,"12185":0,"12518":0,"12526":0,"12527":0,"13279":0,"13346":0,"JAX":0}},{"roster_id":2,"matchup_id":5,"points":0,"starters":["3294","7588","11435","7547","2133","8131","12495","6794","7839","DEN"],"players_points":{"2133":0,"3294":0,"4035":0,"4943":0,"6794":0,"7547":0,"7588":0,"7839":0,"8131":0,"9484":0,"11435":0,"11583":0,"12495":0,"13281":0,"13296":0,"13545":0,"DEN":0,"LAR":0}},{"roster_id":3,"matchup_id":5,"points":0,"starters":["4984","4199","6790","9493","12519","8130","8228","5846","11533","NYJ"],"players_points":{"4199":0,"4984":0,"5846":0,"6790":0,"8130":0,"8134":0,"8228":0,"9493":0,"11533":0,"11624":0,"11628":0,"12481":0,"12519":0,"13414":0,"NYJ":0,"PIT":0}},{"roster_id":4,"matchup_id":1,"points":0,"starters":["8183","6813","8150","6801","8148","11604","11576","10859","12015","CIN"],"players_points":{"2216":0,"4037":0,"5849":0,"6801":0,"6813":0,"6820":0,"8148":0,"8150":0,"8155":0,"8183":0,"10859":0,"11576":0,"11577":0,"11604":0,"12015":0,"12489":0,"CIN":0}},{"roster_id":5,"matchup_id":4,"points":0,"starters":["7523","9221","6806","9997","7569","7002","12501","7526","12711","MIN"],"players_points":{"1433":0,"5022":0,"6806":0,"6904":0,"7002":0,"7523":0,"7526":0,"7569":0,"8151":0,"9221":0,"9997":0,"11630":0,"11834":0,"12487":0,"12501":0,"12711":0,"13286":0,"MIN":0}},{"roster_id":6,"matchup_id":3,"points":0,"starters":["3163","7567","13287","6786","5045","5012","5927","4983","11539","HOU"],"players_points":{"1466":0,"3163":0,"4351":0,"4881":0,"4983":0,"5012":0,"5045":0,"5927":0,"6786":0,"7553":0,"7567":0,"8154":0,"9754":0,"11539":0,"13287":0,"HOU":0}},{"roster_id":7,"matchup_id":2,"points":0,"starters":["11564","11581","11584","10229","8112","10236","12507","3271","2747","NE"],"players_points":{"695":0,"1166":0,"2449":0,"2747":0,"3271":0,"5872":0,"5967":0,"7021":0,"7564":0,"8112":0,"10229":0,"10236":0,"11564":0,"11581":0,"11584":0,"12507":0,"12529":0,"NE":0}},{"roster_id":8,"matchup_id":4,"points":0,"starters":["11566","5892","9511","9488","8144","12506","9500","9487","3451","CLE"],"players_points":{"421":0,"536":0,"3451":0,"4866":0,"5859":0,"5892":0,"8110":0,"8144":0,"9487":0,"9488":0,"9500":0,"9511":0,"9756":0,"11566":0,"12506":0,"12533":0,"CLE":0}},{"roster_id":9,"matchup_id":3,"points":0,"starters":["9228","4034","3198","11632","8146","4217","7611","10232","11792","BAL"],"players_points":{"3198":0,"4034":0,"4217":0,"4950":0,"6770":0,"7611":0,"8146":0,"9228":0,"10213":0,"10232":0,"11632":0,"11792":0,"12490":0,"12517":0,"12534":0,"BAL":0}},{"roster_id":10,"matchup_id":1,"points":0,"starters":["12545","8138","12512","8167","12514","5844","11646","11635","11786","SEA"],"players_points":{"3257":0,"4993":0,"5844":0,"7525":0,"8138":0,"8167":0,"9224":0,"9230":0,"9753":0,"11586":0,"11610":0,"11635":0,"11646":0,"11786":0,"12512":0,"12514":0,"12545":0,"SEA":0}}]},"tx":{"1":[{"type":"waiver","status":"complete","roster_ids":[8],"adds":{"13301":8},"drops":{"8110":8},"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1789410451569,"status_updated":1789455856046},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"12711":5},"drops":{"10219":5},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789311042995,"status_updated":1789311042995},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"8136":4},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789096244067,"status_updated":1789096244067},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"8132":7},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788979848766,"status_updated":1788979848766},{"type":"free_agent","status":"complete","roster_ids":[9],"adds":{"11792":9},"drops":{"13294":9},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788755024201,"status_updated":1788755024201},{"type":"waiver","status":"complete","roster_ids":[9],"adds":{"BAL":9},"drops":{"SF":9},"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1788752609117,"status_updated":1788831289729},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"LV":3},"drops":{"BAL":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788748411973,"status_updated":1788748411973},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"JAX":8},"drops":{"11624":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788747459430,"status_updated":1788747459430},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"7002":10},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788747456618,"status_updated":1788747456618},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"8121":1},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788747445764,"status_updated":1788747445764},{"type":"free_agent","status":"complete","roster_ids":[2],"adds":{"13296":2},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1788747440234,"status_updated":1788747440234}],"2":[{"type":"waiver","status":"complete","roster_ids":[10],"adds":{"12545":10},"drops":{"PHI":10},"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1790043452209,"status_updated":1790060704270},{"type":"waiver","status":"complete","roster_ids":[1],"adds":{"CAR":1},"drops":{"DAL":1},"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1789952316150,"status_updated":1790060704270},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"13301":8},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789915929435,"status_updated":1789915929435},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"6806":5},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789912269221,"status_updated":1789912269221},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"11834":5},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789912093334,"status_updated":1789912093334},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"3214":1},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789907260694,"status_updated":1789907260694},{"type":"free_agent","status":"complete","roster_ids":[9],"adds":{"9228":9},"drops":{"11563":9},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789842811957,"status_updated":1789842811957},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":null,"drops":{"8132":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789784684900,"status_updated":1789784684900},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"5001":10},"drops":{"7002":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789774724023,"status_updated":1789774724023},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"8110":8},"drops":{"13301":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789571843925,"status_updated":1789571843925},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"SF":8},"drops":{"JAX":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789571761928,"status_updated":1789571761928},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"13414":3},"drops":{"6806":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789485624919,"status_updated":1789485624919},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"TB":3},"drops":{"LV":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789481703567,"status_updated":1789481703567},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"11646":10},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1789471170797,"status_updated":1789471170797}],"3":[{"type":"waiver","status":"complete","roster_ids":[2],"adds":{"4943":2},"drops":{"4892":2},"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1790618408028,"status_updated":1790665458760},{"type":"waiver","status":"complete","roster_ids":[2],"adds":{"12495":2},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1790607311612,"status_updated":1790665458760},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"6806":5},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790519522961,"status_updated":1790519522961},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"12487":5},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790519512926,"status_updated":1790519512926},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"13337":7},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790382576377,"status_updated":1790382576377},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":null,"drops":{"13417":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790350157652,"status_updated":1790350157652},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"7002":5},"drops":{"13279":5},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790254454411,"status_updated":1790254454411},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":null,"drops":{"6806":5},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790254248589,"status_updated":1790254248589},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":null,"drops":{"11628":5},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790254128221,"status_updated":1790254128221},{"type":"free_agent","status":"complete","roster_ids":[9],"adds":{"10213":9},"drops":{"5947":9},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790213081818,"status_updated":1790213081818},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"1166":7},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790123755152,"status_updated":1790123755152},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"6650":1},"drops":{"3451":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790121107429,"status_updated":1790121107429},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"11624":3},"drops":{"9480":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790090477051,"status_updated":1790090477051},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"KC":3},"drops":{"TB":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790090438660,"status_updated":1790090438660},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"13346":1},"drops":{"8126":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790071113168,"status_updated":1790071113168}],"4":[{"type":"waiver","status":"complete","roster_ids":[10],"adds":{"4018":10},"drops":{"9486":10},"draft_picks":[],"waiver_budget":[],"settings":{},"metadata":{"notes":"Your waiver claim was processed successfully!"},"created":1791241473761,"status_updated":1791270290310},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"12474":4},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791119800174,"status_updated":1791119800174},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":null,"drops":{"10222":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791119761477,"status_updated":1791119761477},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"3451":8},"drops":{"8259":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791068004936,"status_updated":1791068004936},{"type":"free_agent","status":"complete","roster_ids":[2],"adds":{"11435":2},"drops":{"11631":2},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791066579256,"status_updated":1791066579256},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"2505":10},"drops":{"5001":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791064878855,"status_updated":1791064878855},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"13330":10},"drops":{"6797":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791064721596,"status_updated":1791064721596},{"type":"trade","status":"complete","roster_ids":[1,7],"adds":{"11584":7,"12526":1},"drops":{"11584":1,"12526":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":{},"created":1790981862319,"status_updated":1791129329936},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"9486":10},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790977170158,"status_updated":1790977170158},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"TB":4},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790954034057,"status_updated":1790954034057},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"12015":4},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790953912263,"status_updated":1790953912263},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":null,"drops":{"12508":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790896363753,"status_updated":1790896363753},{"type":"free_agent","status":"complete","roster_ids":[2],"adds":{"4035":2},"drops":{"7543":2},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790887966607,"status_updated":1790887966607},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"ARI":7},"drops":{"NE":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790824065999,"status_updated":1790824065999},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":null,"drops":{"11581":5},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790812104903,"status_updated":1790812104903},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"12185":1},"drops":{"6650":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790777054471,"status_updated":1790777054471},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":null,"drops":{"LAC":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790776979869,"status_updated":1790776979869},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":null,"drops":{"12015":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790776971721,"status_updated":1790776971721},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"11576":4},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790691410753,"status_updated":1790691410753},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"11610":1},"drops":{"6819":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790690334187,"status_updated":1790690334187},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"CHI":1},"drops":{"CAR":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790689137236,"status_updated":1790689137236},{"type":"free_agent","status":"complete","roster_ids":[6],"adds":{"1479":6},"drops":{"9226":6},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790685940843,"status_updated":1790685940843},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"CLE":8},"drops":{"SF":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790683284239,"status_updated":1790683284239},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"13279":1},"drops":{"13298":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1790676106857,"status_updated":1790676106857}],"5":[{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"11581":7},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791737801339,"status_updated":1791737801339},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"11610":10},"drops":{"13264":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791731977142,"status_updated":1791731977142},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"12015":4},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791727670614,"status_updated":1791727670614},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":null,"drops":{"8136":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791727651018,"status_updated":1791727651018},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"11628":3},"drops":{"8142":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791660298904,"status_updated":1791660298904},{"type":"free_agent","status":"complete","roster_ids":[5],"adds":{"11630":5},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791660259238,"status_updated":1791660259238},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"3271":7},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791588468523,"status_updated":1791588468523},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":null,"drops":{"13298":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791489123994,"status_updated":1791489123994},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"3257":10},"drops":{"4018":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791409253147,"status_updated":1791409253147},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"9511":8},"drops":{"13301":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791386276341,"status_updated":1791386276341},{"type":"free_agent","status":"complete","roster_ids":[8],"adds":{"9500":8},"drops":{"8408":8},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791386219200,"status_updated":1791386219200},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":null,"drops":{"12015":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791385851432,"status_updated":1791385851432},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"13298":7},"drops":{"13337":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791345287811,"status_updated":1791345287811},{"type":"free_agent","status":"complete","roster_ids":[7],"adds":{"NE":7},"drops":{"ARI":7},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791327178813,"status_updated":1791327178813},{"type":"free_agent","status":"complete","roster_ids":[3],"adds":{"NYJ":3},"drops":{"KC":3},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791326919151,"status_updated":1791326919151},{"type":"free_agent","status":"complete","roster_ids":[6],"adds":{"8154":6},"drops":{"1479":6},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791326519607,"status_updated":1791326519607},{"type":"free_agent","status":"complete","roster_ids":[2],"adds":{"7839":2},"drops":{"4227":2},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791303072836,"status_updated":1791303072836},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"CIN":4},"drops":{"TB":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791302973067,"status_updated":1791302973067},{"type":"free_agent","status":"complete","roster_ids":[4],"adds":{"11577":4},"drops":{"12474":4},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791302958485,"status_updated":1791302958485},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"5844":10},"drops":{"9500":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791289616932,"status_updated":1791289616932},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"13264":10},"drops":{"13330":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791289465322,"status_updated":1791289465322},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":{"4993":10},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791287944076,"status_updated":1791287944076},{"type":"free_agent","status":"complete","roster_ids":[10],"adds":null,"drops":{"2505":10},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791287681650,"status_updated":1791287681650},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"JAX":1},"drops":{"CHI":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791286181404,"status_updated":1791286181404},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":{"9758":1},"drops":null,"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791280668765,"status_updated":1791280668765},{"type":"free_agent","status":"complete","roster_ids":[1],"adds":null,"drops":{"11610":1},"draft_picks":[],"waiver_budget":[],"settings":null,"metadata":null,"created":1791280463541,"status_updated":1791280463541}]},"players":{"421":["Matthew Stafford","QB","LAR","QB"],"536":["Antonio Brown","WR","","WR"],"695":["Ted Ginn","WR","","WR"],"1166":["Kirk Cousins","QB","LV","QB"],"1433":["Brandon McManus","K","","K"],"1466":["Travis Kelce","TE","KC","TE"],"1479":["Keenan Allen","WR","IND","WR"],"2133":["Davante Adams","WR","LAR","WR"],"2216":["Mike Evans","WR","SF","WR"],"2449":["Stefon Diggs","WR","WAS","WR"],"2505":["Darren Waller","TE","CAR","TE"],"2747":["Jason Myers","K","SEA","K"],"3163":["Jared Goff","QB","DET","QB"],"3198":["Derrick Henry","RB","BAL","RB"],"3214":["Hunter Henry","TE","NE","TE"],"3257":["Jacoby Brissett","QB","ARI","QB"],"3271":["Tyler Higbee","TE","LAR","TE"],"3294":["Dak Prescott","QB","DAL","QB"],"3451":["Ka'imi Fairbairn","K","HOU","K"],"4018":["Joe Mixon","RB","","RB"],"4034":["Christian McCaffrey","RB","SF","RB"],"4035":["Alvin Kamara","RB","NO","RB"],"4037":["Chris Godwin","WR","TB","WR"],"4046":["Patrick Mahomes","QB","KC","QB"],"4199":["Aaron Jones","RB","MIN","RB"],"4217":["George Kittle","TE","SF","TE"],"4227":["Harrison Butker","K","KC","K"],"4351":["Tim Patrick","WR","NYJ","WR"],"4866":["Saquon Barkley","RB","PHI","RB"],"4881":["Lamar Jackson","QB","BAL","QB"],"4892":["Baker Mayfield","QB","TB","QB"],"4943":["Sam Darnold","QB","SEA","QB"],"4950":["Christian Kirk","WR","SF","WR"],"4983":["DJ Moore","WR","BUF","WR"],"4984":["Josh Allen","QB","BUF","QB"],"4993":["Mike Gesicki","TE","CIN","TE"],"5001":["Dalton Schultz","TE","HOU","TE"],"5012":["Mark Andrews","TE","BAL","TE"],"5022":["Dallas Goedert","TE","PHI","TE"],"5045":["Courtland Sutton","WR","DEN","WR"],"5844":["T.J. Hockenson","TE","MIN","TE"],"5846":["DK Metcalf","WR","PIT","WR"],"5849":["Kyler Murray","QB","MIN","QB"],"5850":["Josh Jacobs","RB","GB","RB"],"5859":["A.J. Brown","WR","NE","WR"],"5872":["Deebo Samuel","WR","SF","WR"],"5892":["David Montgomery","RB","HOU","RB"],"5927":["Terry McLaurin","WR","WAS","WR"],"5947":["Jakobi Meyers","WR","JAX","WR"],"5967":["Tony Pollard","RB","TEN","RB"],"6650":["Chase McLaughlin","K","TB","K"],"6770":["Joe Burrow","QB","CIN","QB"],"6786":["CeeDee Lamb","WR","DAL","WR"],"6790":["D'Andre Swift","RB","CHI","RB"],"6794":["Justin Jefferson","WR","MIN","WR"],"6797":["Justin Herbert","QB","LAC","QB"],"6801":["Tee Higgins","WR","CIN","WR"],"6806":["J.K. Dobbins","RB","DEN","RB"],"6813":["Jonathan Taylor","RB","IND","RB"],"6819":["Michael Pittman","WR","PIT","WR"],"6820":["Clyde Edwards-Helaire","RB","","RB"],"6904":["Jalen Hurts","QB","PHI","QB"],"7002":["Juwan Johnson","TE","NO","TE"],"7021":["Rico Dowdle","RB","PIT","RB"],"7523":["Trevor Lawrence","QB","JAX","QB"],"7525":["DeVonta Smith","WR","PHI","WR"],"7526":["Jaylen Waddle","WR","DEN","WR"],"7543":["Travis Etienne","RB","NO","RB"],"7547":["Amon-Ra St. Brown","WR","DET","WR"],"7553":["Kyle Pitts","TE","ATL","TE"],"7564":["Ja'Marr Chase","WR","CIN","WR"],"7567":["Kenny Gainwell","RB","TB","RB"],"7569":["Nico Collins","WR","HOU","WR"],"7588":["Javonte Williams","RB","DAL","RB"],"7594":["Chuba Hubbard","RB","CAR","RB"],"7611":["Rhamondre Stevenson","RB","NE","RB"],"7839":["Evan McPherson","K","CIN","K"],"8110":["Jake Ferguson","TE","DAL","TE"],"8112":["Drake London","WR","ATL","WR"],"8121":["Romeo Doubs","WR","NE","WR"],"8126":["Wan'Dale Robinson","WR","TEN","WR"],"8130":["Trey McBride","TE","ARI","TE"],"8131":["Isaiah Likely","TE","NYG","TE"],"8132":["Tyler Allgeier","RB","ARI","RB"],"8134":["Khalil Shakir","WR","BUF","WR"],"8136":["Rachaad White","RB","WAS","RB"],"8137":["George Pickens","WR","DAL","WR"],"8138":["James Cook","RB","BUF","RB"],"8142":["Alec Pierce","WR","IND","WR"],"8144":["Chris Olave","WR","NO","WR"],"8146":["Garrett Wilson","WR","NYJ","WR"],"8148":["Jameson Williams","WR","DET","WR"],"8150":["Kyren Williams","RB","LAR","RB"],"8151":["Kenneth Walker","RB","KC","RB"],"8154":["Brian Robinson","RB","ATL","RB"],"8155":["Breece Hall","RB","NYJ","RB"],"8167":["Christian Watson","WR","GB","WR"],"8183":["Brock Purdy","QB","SF","QB"],"8228":["Jaylen Warren","RB","PIT","RB"],"8259":["Cameron Dicker","K","LAC","K"],"8408":["Jordan Mason","RB","MIN","RB"],"9221":["Jahmyr Gibbs","RB","DET","RB"],"9224":["Chase Brown","RB","CIN","RB"],"9226":["De'Von Achane","RB","MIA","RB"],"9228":["Bryce Young","QB","CAR","QB"],"9230":["Tanner McKee","QB","PHI","QB"],"9480":["Brenton Strange","TE","JAX","TE"],"9484":["Tucker Kraft","TE","GB","TE"],"9486":["Dontayvion Wicks","WR","PHI","WR"],"9487":["Parker Washington","WR","JAX","WR"],"9488":["Jaxon Smith-Njigba","WR","SEA","WR"],"9493":["Puka Nacua","WR","LAR","WR"],"9500":["Josh Downs","WR","IND","WR"],"9509":["Bijan Robinson","RB","ATL","RB"],"9511":["Keaton Mitchell","RB","LAC","RB"],"9753":["Zach Charbonnet","RB","SEA","RB"],"9754":["Quentin Johnston","WR","LAC","WR"],"9756":["Jordan Addison","WR","MIN","WR"],"9758":["C.J. Stroud","QB","HOU","QB"],"9997":["Zay Flowers","WR","BAL","WR"],"10213":["Tre Tucker","WR","LV","WR"],"10219":["Chris Rodriguez","RB","JAX","RB"],"10222":["Jayden Reed","WR","GB","WR"],"10229":["Rashee Rice","WR","KC","WR"],"10232":["Michael Wilson","WR","ARI","WR"],"10236":["Dalton Kincaid","TE","BUF","TE"],"10859":["Sam LaPorta","TE","DET","TE"],"11435":["Emanuel Wilson","RB","SEA","RB"],"11533":["Brandon Aubrey","K","DAL","K"],"11539":["Jake Bates","K","DET","K"],"11560":["Caleb Williams","QB","CHI","QB"],"11563":["Bo Nix","QB","DEN","QB"],"11564":["Drake Maye","QB","NE","QB"],"11566":["Jayden Daniels","QB","WAS","QB"],"11576":["Braelon Allen","RB","NYJ","RB"],"11577":["Will Shipley","RB","PHI","RB"],"11581":["MarShawn Lloyd","RB","GB","RB"],"11583":["Jonathon Brooks","RB","CAR","RB"],"11584":["Bucky Irving","RB","TB","RB"],"11586":["Blake Corum","RB","LAR","RB"],"11604":["Brock Bowers","TE","LV","TE"],"11610":["Malik Washington","WR","MIA","WR"],"11620":["Rome Odunze","WR","CHI","WR"],"11624":["Xavier Worthy","WR","KC","WR"],"11628":["Marvin Harrison","WR","HOU","WR"],"11630":["Roman Wilson","WR","PIT","WR"],"11631":["Brian Thomas","WR","JAX","WR"],"11632":["Malik Nabers","WR","NYG","WR"],"11635":["Ladd McConkey","WR","LAC","WR"],"11646":["Jalen Coker","WR","CAR","WR"],"11748":["Bub Means","WR","CLE","WR"],"11786":["Cam Little","K","JAX","K"],"11792":["Will Reichard","K","MIN","K"],"11834":["Devaughn Vele","WR","NO","WR"],"12015":["Harrison Mevis","K","LAR","K"],"12185":["Spencer Shrader","K","IND","K"],"12474":["Woody Marks","RB","HOU","RB"],"12481":["Cam Skattebo","RB","NYG","RB"],"12487":["Terrance Ferguson","TE","LAR","TE"],"12489":["RJ Harvey","RB","DEN","RB"],"12490":["Bhayshul Tuten","RB","JAX","RB"],"12495":["Ollie Gordon","RB","MIA","RB"],"12501":["Matthew Golden","WR","GB","WR"],"12506":["Harold Fannin","TE","CLE","TE"],"12507":["Omarion Hampton","RB","LAC","RB"],"12508":["Jaxson Dart","QB","NYG","QB"],"12512":["Quinshon Judkins","RB","CLE","RB"],"12514":["Emeka Egbuka","WR","TB","WR"],"12517":["Colston Loveland","TE","CHI","TE"],"12518":["Tyler Warren","TE","IND","TE"],"12519":["Luther Burden","WR","CHI","WR"],"12526":["Tetairoa McMillan","WR","CAR","WR"],"12527":["Ashton Jeanty","RB","LV","RB"],"12529":["TreVeyon Henderson","RB","NE","RB"],"12533":["Jacory Croskey-Merritt","RB","WAS","RB"],"12534":["Kyle Monangai","RB","CHI","RB"],"12545":["Tyler Shough","QB","NO","QB"],"12711":["Tyler Loop","K","BAL","K"],"13264":["Dohnte Meyers","WR","CIN","WR"],"13279":["Carnell Tate","WR","TEN","WR"],"13281":["Jordyn Tyson","WR","NO","WR"],"13286":["Jadarian Price","RB","SEA","RB"],"13287":["Jeremiyah Love","RB","ARI","RB"],"13294":["Makai Lemon","WR","PHI","WR"],"13296":["Caleb Douglas","WR","MIA","WR"],"13298":["KC Concepcion","WR","CLE","WR"],"13301":["Antonio Williams","WR","WAS","WR"],"13330":["Kenyon Sadiq","TE","NYJ","TE"],"13337":["Emmett Johnson","RB","KC","RB"],"13346":["Denzel Boston","WR","CLE","WR"],"13414":["Kaelon Black","RB","SF","RB"],"13417":["De'Zhaun Stribling","WR","SF","WR"],"13545":["Trey Smack","K","GB","K"],"DAL":["Dallas Cowboys","DEF","DAL","DEF"],"DEN":["Denver Broncos","DEF","DEN","DEF"],"LAR":["Los Angeles Rams","DEF","LAR","DEF"],"LV":["Las Vegas Raiders","DEF","LV","DEF"],"PIT":["Pittsburgh Steelers","DEF","PIT","DEF"],"LAC":["Los Angeles Chargers","DEF","LAC","DEF"],"MIN":["Minnesota Vikings","DEF","MIN","DEF"],"HOU":["Houston Texans","DEF","HOU","DEF"],"NE":["New England Patriots","DEF","NE","DEF"],"JAX":["Jacksonville Jaguars","DEF","JAX","DEF"],"BAL":["Baltimore Ravens","DEF","BAL","DEF"],"PHI":["Philadelphia Eagles","DEF","PHI","DEF"],"SEA":["Seattle Seahawks","DEF","SEA","DEF"],"TB":["Tampa Bay Buccaneers","DEF","TB","DEF"],"SF":["San Francisco 49ers","DEF","SF","DEF"],"CAR":["Carolina Panthers","DEF","CAR","DEF"],"KC":["Kansas City Chiefs","DEF","KC","DEF"],"CHI":["Chicago Bears","DEF","CHI","DEF"],"ARI":["Arizona Cardinals","DEF","ARI","DEF"],"CLE":["Cleveland Browns","DEF","CLE","DEF"],"NYJ":["New York Jets","DEF","NYJ","DEF"],"CIN":["Cincinnati Bengals","DEF","CIN","DEF"]},"proj":{"1":{"421":18.2,"1166":15.7,"1466":9.5,"1479":8.3,"2133":12.6,"2216":12.8,"2449":10.1,"2505":8.5,"2747":6.9,"3163":19,"3198":15.3,"3214":9.4,"3257":12.9,"3271":2.3,"3294":17.9,"3451":6.8,"4034":19.6,"4037":11.8,"4046":15,"4199":9,"4217":10.1,"4227":6.3,"4866":16.3,"4881":19.6,"4892":18.9,"4943":17.1,"4983":10.9,"4984":19.4,"4993":6.7,"5001":8.8,"5012":10.3,"5022":10,"5045":10.2,"5844":8.8,"5846":11.3,"5849":18.1,"5859":16.8,"5872":10.1,"5892":15.2,"5927":12.1,"5947":10.4,"5967":11.4,"6650":6.2,"6770":20.9,"6786":16.1,"6790":13.4,"6794":17.5,"6797":17.5,"6801":16.1,"6806":10.1,"6813":19,"6819":10.2,"6904":20.8,"7002":10.4,"7021":12.5,"7523":18.6,"7525":15.7,"7526":14.2,"7543":15.9,"7547":20.2,"7553":9.7,"7564":20.4,"7567":12.3,"7569":16.5,"7588":17.1,"7594":10.8,"7611":16.4,"7839":6.8,"8110":9.1,"8112":14.2,"8121":10.6,"8126":11.2,"8130":14.3,"8131":10.5,"8132":8.7,"8134":10.3,"8136":9.2,"8137":15.6,"8138":16.5,"8142":9.3,"8144":16.1,"8146":14.8,"8148":14.2,"8150":14.6,"8151":13.7,"8154":4.6,"8155":15.6,"8167":12.6,"8183":18.5,"8228":13.5,"8259":7.1,"8408":8.8,"9221":22.1,"9224":17.1,"9226":16.6,"9228":16.6,"9480":8.2,"9484":10.5,"9486":8.4,"9487":12.2,"9488":19.7,"9493":21,"9500":12.1,"9509":19.3,"9511":6.7,"9754":11,"9756":11.7,"9758":15.5,"9997":15.6,"10213":10.5,"10219":7.5,"10222":12.1,"10229":12.8,"10232":10.4,"10236":8.6,"10859":13.8,"11435":2.4,"11533":6.8,"11539":7.2,"11560":18.3,"11563":17,"11564":19.7,"11566":17.1,"11576":4.5,"11577":1.3,"11581":9.5,"11583":9.9,"11584":14.7,"11586":8.6,"11610":8.2,"11620":11.2,"11624":8.2,"11628":9.7,"11630":1.9,"11631":10.5,"11632":12.9,"11635":13.2,"11646":11.9,"11786":6.5,"11792":6.6,"11834":9.8,"12015":7,"12185":7.3,"12474":8.8,"12481":15.2,"12487":4.5,"12489":9.6,"12490":10.6,"12495":2.4,"12501":9,"12506":10.5,"12507":16,"12508":18.9,"12512":10.9,"12514":12.9,"12517":13.8,"12518":13.8,"12519":13.1,"12526":14.9,"12527":16,"12533":9.8,"12534":7.3,"12545":18.1,"12711":7.1,"13264":0.6,"13279":10.6,"13286":9.8,"13287":11.9,"13294":6.5,"13296":5.3,"13298":8.6,"13301":2.7,"13330":4.4,"13337":3.3,"13346":7.1,"13414":3.1,"13417":6.9,"13545":7.1,"SEA":8.8,"NE":6.7,"SF":5.7,"LAR":7,"CLE":5.1,"TB":5.6,"ARI":3.4,"CAR":6,"JAX":9.1,"LAC":8.1,"MIN":7.2,"PHI":8.7,"CHI":6.8,"NYJ":7.8,"BAL":7.4,"HOU":7.1,"LV":8.5,"CIN":6.2,"DAL":6.8,"PIT":9.2,"DEN":7.1,"KC":8.4},"2":{"421":15.8,"1166":13.6,"1466":10.6,"1479":7.8,"2133":13.6,"2216":12.9,"2449":12.7,"2505":6.6,"2747":8.3,"3163":16.3,"3198":15.2,"3214":10.2,"3257":12.4,"3271":2.5,"3294":19.5,"3451":9.2,"4034":19.8,"4035":5.3,"4037":10.4,"4046":17.7,"4199":14,"4217":10.7,"4227":7.8,"4866":16.6,"4881":20.4,"4892":17.3,"4983":13.1,"4984":22,"4993":5.7,"5001":10.7,"5012":10.5,"5022":10.2,"5045":10.7,"5844":9.1,"5846":13.9,"5872":10.4,"5892":17.1,"5927":14,"5947":7.4,"5967":8.9,"6650":8.4,"6770":17.8,"6786":17.8,"6790":12.6,"6794":17.8,"6797":16.9,"6801":13.8,"6806":12.9,"6813":18.8,"6904":20.8,"7002":9.9,"7021":11,"7523":17.2,"7525":14.8,"7526":12.7,"7543":11.8,"7547":17.4,"7553":8.8,"7564":17.2,"7567":8,"7588":17.4,"7594":12.4,"7611":12.3,"7839":7.3,"8110":9.6,"8112":11.8,"8121":9,"8126":7.7,"8130":14.8,"8131":11.8,"8132":6.4,"8134":11,"8136":8.8,"8137":15.7,"8138":19.5,"8142":11.6,"8144":15.6,"8146":15.1,"8148":12.6,"8150":16.5,"8151":17,"8154":6,"8155":14.4,"8167":14.8,"8183":20,"8228":11.6,"8259":9,"9221":26.1,"9224":15.7,"9226":16.9,"9228":16.5,"9480":7.9,"9484":11.9,"9486":8,"9487":13,"9488":19.6,"9500":10.4,"9509":22.5,"9511":6.3,"9754":9.8,"9756":10.9,"9758":17.9,"10213":8.8,"10219":6.6,"10222":11.6,"10229":13.9,"10232":9.9,"10236":12.2,"10859":11.2,"11435":2,"11533":9.5,"11539":7.6,"11560":18.6,"11563":15.7,"11564":18.9,"11566":20.2,"11576":5.6,"11577":2.3,"11581":11.8,"11583":6.7,"11584":13.8,"11586":10.2,"11610":9.2,"11620":9.7,"11624":9.9,"11628":9.3,"11630":8.4,"11631":8.3,"11632":13.6,"11635":13.1,"11646":12.9,"11786":8.1,"11792":7.9,"11834":9.6,"12015":8.6,"12185":8.3,"12474":9,"12481":14.6,"12487":5.3,"12490":9.1,"12495":2.6,"12501":11.8,"12506":9.8,"12507":14,"12508":18.4,"12512":12.4,"12514":10.8,"12517":11.9,"12518":11.3,"12519":11.5,"12526":14.6,"12527":15.9,"12529":9.5,"12533":12.5,"12534":7.1,"12545":15.5,"12711":8,"13264":0.5,"13279":8.5,"13286":11.8,"13287":12.5,"13294":6.3,"13296":8.9,"13298":9.9,"13301":7.3,"13330":5.6,"13337":3.3,"13346":8.9,"13414":7.1,"13545":8.4,"CLE":5.1,"NE":8.6,"CHI":7.1,"CIN":6.3,"MIN":6.4,"PIT":6.4,"TB":9.8,"ARI":4.4,"DAL":6.5,"DEN":6.8,"JAX":6.3,"LV":4.4,"NYJ":4.9,"SEA":8.9,"BAL":9,"CAR":7.9,"HOU":6.8,"SF":9.2,"LAC":8.2,"PHI":9.6,"KC":8.5,"LAR":8.7},"3":{"421":15.9,"1166":14.9,"1466":11.7,"1479":7.7,"2133":14.2,"2216":12.6,"2449":9.2,"2505":7.9,"2747":7.9,"3163":19.5,"3198":18.9,"3214":10.6,"3257":15.7,"3271":1.6,"3294":19,"3451":8.8,"4034":20.6,"4035":8.1,"4037":9.5,"4046":20.7,"4199":12.9,"4217":12.2,"4227":8.4,"4866":16,"4881":24.5,"4892":16,"4943":16.9,"4983":12.4,"4984":23.7,"4993":6.4,"5001":11.8,"5012":11.8,"5045":10.2,"5844":8.8,"5846":11.2,"5849":17.5,"5872":11.4,"5892":14.4,"5927":9.8,"5947":8.4,"5967":12.4,"6650":7.8,"6770":17.5,"6786":17.4,"6790":14.1,"6794":16.7,"6797":16.9,"6801":13.5,"6806":11.3,"6813":19.9,"6819":9.4,"6904":18.5,"7002":10.3,"7523":19.3,"7525":15.2,"7526":13.3,"7543":11.3,"7547":19.7,"7553":9.5,"7564":16.8,"7567":7.7,"7588":15.4,"7594":14.8,"7611":10.7,"7839":7.5,"8110":9.3,"8112":13.5,"8121":9.4,"8126":8.8,"8130":16.9,"8131":9.8,"8132":7.2,"8134":10.1,"8136":7,"8137":14.9,"8138":16.6,"8144":17.9,"8146":16,"8148":12.8,"8150":13.5,"8151":20.2,"8154":4.4,"8155":15.9,"8167":15.6,"8183":21.6,"8228":16.2,"8259":7.7,"9221":23.5,"9224":16.1,"9226":16.4,"9228":16.2,"9480":9.2,"9484":11.5,"9486":9.4,"9487":15.3,"9488":21.9,"9500":11.2,"9509":20.1,"9511":6.7,"9754":9.1,"9756":9.2,"9758":15.4,"9997":14.1,"10213":8.9,"10219":4.7,"10229":12.2,"10232":12,"10236":13.2,"10859":12.3,"11435":6.6,"11533":8.7,"11539":8.8,"11563":17.3,"11564":18.6,"11576":6.3,"11577":2.7,"11581":10.2,"11584":14.7,"11586":8.2,"11604":13,"11610":10.1,"11620":8.9,"11624":10.4,"11628":7.6,"11630":5.7,"11631":9.1,"11632":13.7,"11635":14.1,"11646":14.7,"11786":8.4,"11792":8,"11834":10.1,"12015":7.9,"12185":9.1,"12474":7.9,"12481":15.1,"12487":7.7,"12489":10.8,"12490":11.4,"12495":3.5,"12501":11.2,"12506":9.4,"12507":14.1,"12512":12.3,"12514":9.7,"12517":9.5,"12518":10.3,"12519":10.3,"12526":14.2,"12527":15.9,"12529":12.6,"12533":9.4,"12534":7.8,"12545":18.4,"12711":8.4,"13264":2.9,"13279":9.1,"13286":10.1,"13287":14.7,"13294":6,"13298":9.5,"13301":4.4,"13330":8.6,"13337":5,"13346":10.1,"13414":5.5,"13545":8.7,"ARI":3.6,"CIN":7.8,"DAL":5.1,"BAL":6.6,"JAX":6.7,"MIN":8.6,"SEA":9.3,"SF":8.2,"CAR":8.6,"HOU":7.9,"KC":9.2,"LAC":3.6,"LV":5.6,"NE":6.6,"DEN":6.5,"NYJ":3.5,"PIT":6.4,"CLE":6.4,"LAR":6.5,"TB":6.8,"CHI":6.1,"PHI":8.8},"4":{"421":16.5,"1166":14.7,"1466":11.7,"2133":15.3,"2216":14.1,"2449":12.7,"2505":10.7,"2747":8.4,"3163":18.6,"3198":19.4,"3214":9.6,"3257":15.8,"3271":8.1,"3294":18.3,"3451":9,"4034":19.4,"4035":9.8,"4037":9.2,"4046":21.3,"4199":15.1,"4217":12,"4227":8.2,"4881":21.8,"4943":17.1,"4983":13.9,"4984":23.4,"4993":8.1,"5001":10.5,"5012":9.8,"5045":10.1,"5844":9.8,"5846":9.6,"5849":17.9,"5872":9.3,"5892":15,"5947":9.9,"5967":9.4,"6650":7.6,"6770":19.6,"6786":17.4,"6790":16.3,"6797":14.3,"6801":16.6,"6806":8.2,"6813":21.7,"6819":9.4,"6904":16.6,"7002":12.7,"7523":20.5,"7526":12.6,"7547":19.4,"7553":7.9,"7567":7.7,"7569":18.6,"7588":15,"7594":16.3,"7611":12.7,"7839":8.4,"8110":9,"8112":17,"8121":9,"8126":9.9,"8130":17.5,"8131":11.4,"8132":7.9,"8134":8.2,"8137":14.7,"8138":17.3,"8144":19,"8146":18.8,"8148":11.8,"8150":13.7,"8151":19.9,"8154":4.8,"8167":15.2,"8183":20.4,"8228":18.6,"8259":7.1,"9221":25.7,"9224":17.4,"9228":19.4,"9480":9.9,"9484":10.5,"9486":11.4,"9487":17.2,"9488":22.6,"9493":19.3,"9500":13.9,"9509":23.2,"9511":6,"9754":8.7,"9756":12.9,"9758":18.5,"9997":16.1,"10213":8.4,"10219":5.4,"10229":14,"10232":14.6,"10236":12.2,"10859":11.7,"11435":9.9,"11533":8.8,"11539":7.9,"11563":18.3,"11564":17.8,"11576":12.8,"11577":2.3,"11581":7.9,"11584":14.5,"11586":7.1,"11604":15.2,"11610":8.9,"11620":8.6,"11624":9.7,"11628":5.5,"11630":5.2,"11631":7.8,"11632":13.9,"11786":8.1,"11792":9.2,"11834":10.9,"12015":7.7,"12185":9.4,"12474":8.7,"12481":15.4,"12489":11.1,"12490":12.7,"12495":8.4,"12501":12.1,"12506":11.7,"12507":10.7,"12512":10.8,"12514":10.8,"12517":10.4,"12518":12.6,"12519":12.7,"12526":15.9,"12527":15.4,"12529":9.6,"12533":13.3,"12534":8.3,"12545":17.9,"12711":8.1,"13264":3.8,"13279":10,"13287":15.9,"13294":10.1,"13298":9.2,"13301":7.9,"13330":11,"13337":4.5,"13346":10.6,"13414":5.4,"13545":8.2,"CLE":7.9,"PIT":8.6,"NE":4.7,"ARI":6.8,"KC":8.2,"LV":5.9,"BAL":9.4,"CAR":4.9,"DEN":6.2,"LAC":5.4,"MIN":9.5,"SEA":8.8,"CIN":6.5,"JAX":6.3,"LAR":8.3,"NYJ":6.2,"TB":7.7,"CHI":8.5,"DAL":6.3,"HOU":6.7,"PHI":6.3,"SF":6.9},"5":{"421":18.7,"1166":14.8,"1479":8.3,"2133":16.1,"2216":13.5,"2747":8.6,"3163":21.8,"3198":18,"3214":9.4,"3257":18.2,"3271":8,"3294":20.9,"3451":8.7,"4034":18.9,"4035":10.9,"4037":10.3,"4199":14.9,"4217":12.7,"4351":3.4,"4943":16.6,"4984":21.8,"4993":8.2,"5001":8.6,"5012":10.4,"5022":9.5,"5045":8.8,"5844":10.4,"5846":12.6,"5849":16.8,"5872":10,"5892":12.9,"5927":11.5,"5947":8.8,"5967":9.6,"6650":7.7,"6770":19.9,"6786":20.7,"6790":17.9,"6794":16.3,"6797":14.7,"6801":14.8,"6806":9.1,"6813":19.1,"6904":14.9,"7002":10.2,"7523":17.9,"7526":12.1,"7547":21.1,"7553":7.8,"7564":20.2,"7567":8.6,"7569":17.8,"7588":19.3,"7611":13.1,"7839":8.6,"8110":9.3,"8112":17.3,"8121":12.9,"8126":9.6,"8130":18.1,"8131":11.4,"8132":9.2,"8134":10.8,"8136":7,"8137":13.9,"8138":15.4,"8144":16.1,"8146":15.6,"8148":11.9,"8150":19.5,"8154":5.3,"8167":15.6,"8183":17.6,"8228":19.8,"8259":7,"9221":25.9,"9224":17.8,"9480":9.6,"9484":11,"9486":9.1,"9487":14,"9488":23.2,"9493":20.7,"9500":10.4,"9509":24.4,"9511":9.9,"9758":15.3,"9997":15.7,"10213":8.9,"10219":5.4,"10232":16.3,"10236":10.8,"10859":13.1,"11435":12.6,"11533":9.4,"11539":8.4,"11563":17.6,"11564":19.2,"11566":16.9,"11576":15.3,"11577":10.5,"11581":9.8,"11584":15.2,"11586":7.1,"11604":15.9,"11610":11.5,"11620":9.7,"11630":9,"11631":6.8,"11632":14,"11786":8.6,"11792":8.8,"11834":9.7,"12015":8,"12185":8.6,"12474":8.8,"12481":12.8,"12489":11.7,"12490":12.7,"12495":12.7,"12501":12.9,"12506":10.8,"12507":10.1,"12512":11.5,"12514":10.8,"12517":9.9,"12518":10.6,"12519":11.7,"12527":12.8,"12529":10.9,"12533":9.1,"12545":15.2,"12711":7.5,"13264":4.6,"13279":12.2,"13287":12.7,"13294":7.2,"13298":9.5,"13301":8.9,"13330":8.7,"13346":10,"13414":2.4,"13545":8.2,"DAL":8.8,"TB":4.2,"CIN":8.9,"LAC":5.6,"LV":4.6,"BAL":6.3,"CLE":7.9,"NE":6.9,"CHI":6.9,"NYJ":8.1,"PIT":7.7,"ARI":3.9,"DEN":8.3,"HOU":9.3,"JAX":8.7,"MIN":7.9,"SEA":6.4,"PHI":5.5,"SF":6.2,"LAR":6},"6":{"421":21.9,"1166":17.1,"1466":12.2,"1479":8.5,"2133":17.2,"2216":14.7,"2449":10.5,"2505":8.3,"2747":7.9,"3198":16.3,"3214":8.9,"3257":14.4,"3271":4.4,"3294":18.7,"3451":8.5,"4034":22.5,"4035":10.3,"4037":9,"4046":19.2,"4217":14.9,"4227":7.9,"4351":2.6,"4866":11.1,"4881":20.6,"4943":14.2,"4983":14.6,"4984":24.9,"5001":8.6,"5012":9.5,"5022":10.8,"5045":7.7,"5846":12.1,"5927":10.8,"5947":8.9,"5967":10.5,"6650":7.5,"6786":20.2,"6790":15.2,"6797":13,"6806":7.7,"6813":22.9,"6904":16,"7002":10.9,"7021":7.3,"7523":18.5,"7525":11.6,"7526":11.2,"7553":7.8,"7567":8.7,"7569":18.1,"7588":17.1,"7594":16.2,"7611":12.9,"8110":9,"8112":18.4,"8121":10.2,"8126":11.3,"8130":16.5,"8131":13.3,"8132":6.6,"8134":8.6,"8136":6,"8137":13.5,"8138":17,"8144":17.3,"8146":15.2,"8150":21.3,"8151":21.7,"8154":5.8,"8155":12.4,"8167":18.7,"8183":22.4,"8228":15.3,"8259":7,"9228":16.8,"9480":10.3,"9484":12.9,"9486":6,"9487":15.2,"9488":21.6,"9493":22.5,"9500":12.2,"9509":25.4,"9511":7.4,"9754":6.5,"9758":15.3,"9997":17.3,"10213":8.9,"10219":4.9,"10229":14.3,"10232":13.7,"10236":10.6,"11435":13.1,"11533":8.8,"11560":17.8,"11563":14.2,"11564":20.8,"11566":16.8,"11576":6.9,"11581":12.2,"11584":14.9,"11586":7.9,"11604":16.5,"11620":10.5,"11624":9.9,"11628":1.5,"11631":7.2,"11632":14.2,"11635":11.2,"11646":13.1,"11786":8.3,"11834":10.5,"12015":8.7,"12185":10.4,"12474":12.4,"12481":13.6,"12489":10.1,"12490":11.8,"12501":15.5,"12506":10.5,"12507":8.9,"12512":9,"12514":10,"12517":10.4,"12518":12.7,"12519":12.4,"12526":13.6,"12527":16.2,"12529":10,"12533":7.1,"12534":4.1,"12545":16.5,"12711":7.8,"13279":13.8,"13287":10,"13294":5.2,"13298":9.1,"13301":5.3,"13330":5.5,"13337":4.6,"13346":10.2,"13414":4.4,"13545":9,"SEA":8.1,"DEN":6.5,"CHI":6.7,"LV":4.2,"BAL":8.9,"LAR":8.3,"CAR":6.7,"CLE":6,"JAX":7.9,"ARI":3.3,"HOU":6.3,"PHI":7.6,"KC":9.1,"PIT":8.2,"TB":6.3,"DAL":5.6,"LAC":4.2,"NE":8.9,"NYJ":4.7,"SF":7.5}},"taken":"2026-10-13T01:27:35.734Z"}</script>
+<script>
+(() => {
+"use strict";
+/* =====================================================================
+   SETTINGS: edit these to make the paper yours.
+   ===================================================================== */
+const CONFIG = {
+  // Your Sleeper league. The page loads this league unless the link says ?league=OTHER_ID.
+  leagueId: "1355333984036327424",
+  // Name on the masthead. Leave "" to use your Sleeper league name + "Gazette".
+  paperName: "",
+  // Sleeper username -> the name the stories call that manager.
+  // Example: { "bigtone": "Tony", "jess.r": "Jess" }
+  nicknames: {},
+  // Names for the player awards.
+  awards: {
+    ghost:  "The Empty Jersey Award",
+    fools:  "The Fool's Gold Award",
+    sixth:  "The Wasted Talent Award",
+    star:   "Player of the Week"
+  }
+};
+/* ===================================================================== */
+
+const API = "https://api.sleeper.app/v1";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const f1 = n => (Math.round(n*10)/10).toFixed(1);
+const f2 = n => (Math.round(n*100)/100).toFixed(2);
+const ord = n => { const s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
+const sum = a => a.reduce((x,y)=>x+y,0);
+const poss = s => s + (/s$/i.test(String(s).trim()) ? "'" : "'s");
+const n1 = n => Number.isInteger(n) ? String(n) : f1(n);
+const aN = n => /^(8|11|18)(\.|\d\d\.)/.test(f1(n)) || /^8/.test(f1(n)) ? "an" : "a";
+const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
+const NY_DAY = () => new Date().toLocaleString("en-US",{timeZone:"America/New_York",weekday:"short"});
+
+function hash(str){ let h=2166136261; for (const c of String(str)) { h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+function rng(seed){ let a=seed>>>0; return () => { a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+
+/* ---------------- Sleeper ---------------- */
+async function getJSON(path){ const r = await fetch(API + path); if (!r.ok) throw new Error("Sleeper returned " + r.status + "."); return r.json(); }
+async function loadPlayers(){
+  const KEY = "gazette_players_v2";
+  try { const c = JSON.parse(store.get(KEY) || "null"); if (c && Date.now()-c.ts < 86400000) return c.map; } catch {}
+  const raw = await getJSON("/players/nfl"), map = {};
+  for (const [id,p] of Object.entries(raw)) {
+    const name = p.position==="DEF" ? `${p.first_name} ${p.last_name}` : (p.full_name || `${p.first_name||""} ${p.last_name||""}`.trim());
+    map[id] = [name||id, p.position||"", p.team||"", (p.fantasy_positions||[p.position]).filter(Boolean).join(",")];
+  }
+  store.set(KEY, JSON.stringify({ts:Date.now(), map}));
+  return map;
+}
+async function fetchProjections(season, week){
+  try {
+    const pos = ["QB","RB","WR","TE","K","DEF"].map(p=>"position[]="+p).join("&");
+    const r = await fetch(`https://api.sleeper.app/projections/nfl/${season}/${week}?season_type=regular&${pos}`);
+    if (!r.ok) return {};
+    const j = await r.json();
+    const arr = Array.isArray(j) ? j : Object.entries(j).map(([player_id,stats])=>({player_id,stats}));
+    return Object.fromEntries(arr.filter(x=>x && x.stats && x.player_id).map(x=>[x.player_id, x.stats]));
+  } catch { return {}; }
+}
+function lastWeekOf(league){ return (league.settings?.playoff_week_start || 15) + 2; }
+function availableWeeks(state, league){
+  if (String(league.season) !== String(state.season) || state.season_type === "post") return lastWeekOf(league);
+  if (state.season_type === "pre") return 1;
+  return Math.max(1, Math.min(state.week, lastWeekOf(league)));
+}
+function defaultWeek(state, league){
+  const max = availableWeeks(state, league);
+  if (String(league.season) !== String(state.season)) return max;
+  return ["Tue","Wed"].includes(NY_DAY()) ? max : Math.max(1, max-1);
+}
+async function fetchLeague(leagueId, week){
+  const [state, league, users, rosters] = await Promise.all([getJSON("/state/nfl"), getJSON(`/league/${leagueId}`), getJSON(`/league/${leagueId}/users`), getJSON(`/league/${leagueId}/rosters`)]);
+  if (!league) throw new Error("No Sleeper league has that ID.");
+  const maxWeek = availableWeeks(state, league);
+  const W = Math.min(week || defaultWeek(state, league), maxWeek) || 1;
+  const weeks = []; for (let w=1; w<=W+1; w++) weeks.push(w);
+  const [lists, tx, players, projW, projNext] = await Promise.all([
+    Promise.all(weeks.map(w => getJSON(`/league/${leagueId}/matchups/${w}`).catch(()=>[]))),
+    getJSON(`/league/${leagueId}/transactions/${W}`).catch(()=>[]),
+    loadPlayers(), fetchProjections(league.season, W), fetchProjections(league.season, W+1)
+  ]);
+  const matchups = {}; weeks.forEach((w,i)=>matchups[w]=lists[i]||[]);
+  let editionDate = null;
+  if (String(league.season)===String(state.season) && state.season_start_date) {
+    const d = new Date(state.season_start_date+"T12:00:00"); d.setDate(d.getDate() + 7*(W-1) + 6); editionDate = d;
+  }
+  return {state, league, users, rosters, matchups, tx, players, projW, projNext, week:W, maxWeek, leagueId, editionDate, live:true};
+}
+
+/* ---------------- Model ---------------- */
+const SLOT_ELIG = {QB:["QB"],RB:["RB"],WR:["WR"],TE:["TE"],K:["K"],DEF:["DEF"],DL:["DL"],LB:["LB"],DB:["DB"],
+  FLEX:["RB","WR","TE"],SUPER_FLEX:["QB","RB","WR","TE"],REC_FLEX:["WR","TE"],WRRB_FLEX:["RB","WR"],IDP_FLEX:["DL","LB","DB"]};
+const SLOT_LABEL = {FLEX:"FLX",SUPER_FLEX:"SF",REC_FLEX:"RFX",WRRB_FLEX:"W/R",IDP_FLEX:"IDP",DEF:"D/ST"};
+
+function buildModel(d){
+  const W = d.week, P = d.players, sc = d.league.scoring_settings || {};
+  const pName = id => P[id]?.[0] || (isNaN(id) ? id+" Defense" : "Player "+id);
+  const pPos = id => P[id]?.[1] || (isNaN(id) ? "DEF" : "");
+  const pNfl = id => P[id]?.[2] || (isNaN(id) ? id : "");
+  const pElig = id => (P[id]?.[3] || pPos(id)).split(",");
+  const pPhoto = id => d.live ? (isNaN(id) ? `https://sleepercdn.com/images/team_logos/nfl/${String(id).toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${id}.jpg`) : null;
+  const ptsKey = (sc.rec ?? 0) >= 1 ? "pts_ppr" : (sc.rec ?? 0) >= .5 ? "pts_half_ppr" : "pts_std";
+  const projOf = (map, pid) => { const s = map?.[pid]; if (!s) return null; if (s[ptsKey]!=null) return s[ptsKey]; let t=0, hit=false; for (const k in s) if (sc[k]!=null && typeof s[k]==="number"){ t+=s[k]*sc[k]; hit=true; } return hit ? Math.round(t*100)/100 : null; };
+
+  const usersById = Object.fromEntries(d.users.map(u=>[u.user_id,u]));
+  const teams = {};
+  for (const r of d.rosters) {
+    const u = usersById[r.owner_id] || {};
+    const avatar = !d.live ? null : (u.metadata?.avatar && /^https?:/.test(u.metadata.avatar) ? u.metadata.avatar : (u.avatar ? `https://sleepercdn.com/avatars/thumbs/${u.avatar}` : null));
+    const name = (u.metadata?.team_name || u.display_name || "Team "+r.roster_id).trim();
+    teams[r.roster_id] = {rid:r.roster_id, name, owner:u.display_name||"", avatar, nick: CONFIG.nicknames[u.display_name] || CONFIG.nicknames[u.username] || null};
+  }
+  const tName = rid => teams[rid]?.name || "Team "+rid;
+  const tNick = rid => teams[rid]?.nick || tName(rid);
+
+  const gamesByWeek = {};
+  for (let w=1; w<=W+1; w++) {
+    const byM = {}; for (const m of d.matchups[w]||[]) { if (m.matchup_id==null) continue; (byM[m.matchup_id] ||= []).push(m); }
+    gamesByWeek[w] = Object.values(byM).filter(g=>g.length===2).map(([a,b])=>({a,b}));
+  }
+
+  function standings(through){
+    const s = {}; for (const rid in teams) s[rid] = {rid:+rid,w:0,l:0,t:0,pf:0,pa:0,results:[],scores:[]};
+    for (let w=1; w<=through; w++) for (const {a,b} of gamesByWeek[w]||[]) {
+      const A=s[a.roster_id], B=s[b.roster_id]; if (!A||!B) continue;
+      const pa=a.points||0, pb=b.points||0;
+      A.pf+=pa; A.pa+=pb; B.pf+=pb; B.pa+=pa; A.scores.push(pa); B.scores.push(pb);
+      if (pa>pb){A.w++;B.l++;A.results.push("W");B.results.push("L");} else if (pb>pa){B.w++;A.l++;B.results.push("W");A.results.push("L");} else {A.t++;B.t++;A.results.push("T");B.results.push("T");}
+    }
+    const arr = Object.values(s);
+    for (const t of arr) {
+      const last=t.results.at(-1); let n=0; for (let i=t.results.length-1;i>=0&&t.results[i]===last;i--) n++;
+      t.streakType=last; t.streakLen=n; t.streak=last?last+n:"—"; t.gp=t.w+t.l+t.t; t.pct=t.gp?(t.w+t.t/2)/t.gp:0;
+      t.rec = `${t.w}-${t.l}${t.t?"-"+t.t:""}`;
+    }
+    arr.sort((x,y)=>y.pct-x.pct||y.pf-x.pf); arr.forEach((t,i)=>t.rank=i+1);
+    return Object.fromEntries(arr.map(t=>[t.rid,t]));
+  }
+  const stand = standings(W), standPrev = standings(W-1);
+
+  function power(through){
+    if (through<1) return {};
+    const ids = Object.keys(teams).map(Number), st = standings(through), ap = Object.fromEntries(ids.map(i=>[i,{w:0,g:0}]));
+    for (let w=1; w<=through; w++) {
+      const s = (d.matchups[w]||[]).filter(m=>m.matchup_id!=null).map(m=>[m.roster_id,m.points||0]);
+      for (const [r1,p1] of s) for (const [r2,p2] of s) if (r1!==r2 && ap[r1]) { ap[r1].g++; if (p1>p2) ap[r1].w++; else if (p1===p2) ap[r1].w+=.5; }
+    }
+    const recent = Object.fromEntries(ids.map(i=>{ const s=st[i].scores.slice(-3); return [i, s.length?sum(s)/s.length:0]; }));
+    const maxPF=Math.max(1,...ids.map(i=>st[i].pf)), maxR=Math.max(1,...Object.values(recent));
+    const rows = ids.map(i=>({rid:i, ap:ap[i].g?ap[i].w/ap[i].g:0, apW:ap[i].w, apG:ap[i].g, recent:recent[i],
+      score:.4*(ap[i].g?ap[i].w/ap[i].g:0)+.25*st[i].pct+.2*(st[i].pf/maxPF)+.15*(recent[i]/maxR)}));
+    rows.sort((a,b)=>b.score-a.score); rows.forEach((r,i)=>r.rank=i+1);
+    return Object.fromEntries(rows.map(r=>[r.rid,r]));
+  }
+  const pow = power(W), powPrev = power(W-1);
+
+  const hist = {};
+  for (let w=1; w<W; w++) for (const m of d.matchups[w]||[]) { const st=new Set(m.starters||[]); for (const [pid,pts] of Object.entries(m.players_points||{})) if (st.has(pid)||pts) (hist[pid] ||= []).push(pts); }
+  const avg = pid => hist[pid]?.length ? sum(hist[pid])/hist[pid].length : null;
+  const hasProj = Object.keys(d.projW||{}).length > 0;
+  const expected = pid => { const p = projOf(d.projW, pid); return p!=null ? p : (hasProj ? null : avg(pid)); };
+  const expLabel = hasProj ? "Projected" : "Season avg";
+
+  const slotList = (d.league.roster_positions||[]).filter(s=>SLOT_ELIG[s]);
+  function lineup(m){
+    const pts=m.players_points||{}, starters=(m.starters||[]).filter(p=>p&&p!=="0");
+    const actual=sum(starters.map(p=>pts[p]||0));
+    const pool=(m.players||[]).map(p=>({p,pts:pts[p]||0,elig:pElig(p)})).sort((a,b)=>b.pts-a.pts);
+    const used=new Set(); let optimal=0;
+    for (const slot of [...slotList].sort((a,b)=>SLOT_ELIG[a].length-SLOT_ELIG[b].length)) { const pk=pool.find(x=>!used.has(x.p)&&x.elig.some(e=>SLOT_ELIG[slot].includes(e))); if (pk){used.add(pk.p); optimal+=pk.pts;} }
+    const bench=pool.filter(x=>!starters.includes(x.p));
+    const top=starters.map(p=>({p,pts:pts[p]||0})).sort((a,b)=>b.pts-a.pts);
+    const slots=(m.starters||[]).map((p,i)=>({slot:slotList[i]||"", p, pts:pts[p]||0}));
+    return {actual, optimal:Math.max(optimal,actual), left:Math.max(0,optimal-actual), top, bench, slots};
+  }
+  const games = (gamesByWeek[W]||[]).map(({a,b})=>{
+    const [win,lose]=(a.points||0)>=(b.points||0)?[a,b]:[b,a];
+    const g={w:win.roster_id,l:lose.roster_id,ws:win.points||0,ls:lose.points||0,tie:(a.points||0)===(b.points||0),wl:lineup(win),ll:lineup(lose)};
+    g.margin=g.ws-g.ls;
+    const pw=powPrev[g.w]?.rank, pl=powPrev[g.l]?.rank, sw=standPrev[g.w], sl=standPrev[g.l];
+    g.upset = W>1 && ((pw&&pl&&pw-pl>=3)||(sw&&sl&&sl.pct-sw.pct>=.34));
+    g.type = g.tie ? "tie" : g.upset ? "upset" : g.margin>=35 ? "blowout" : g.margin<4 ? "nail" : "default";
+    return g;
+  }).sort((x,y)=>y.ws-x.ws);
+  const allScores = games.flatMap(g=>[g.ws,g.ls]);
+  const sorted = [...allScores].sort((a,b)=>a-b);
+  const median = sorted.length ? (sorted[Math.floor((sorted.length-1)/2)]+sorted[Math.ceil((sorted.length-1)/2)])/2 : 0;
+  const leagueAvg = allScores.length ? sum(allScores)/allScores.length : 0;
+
+  // Records
+  function records(through){
+    const r = {};
+    const better = (k,v,obj,cmp) => { if (!r[k] || cmp(v, r[k].v)) r[k] = {v, ...obj}; };
+    for (let w=1; w<=through; w++) for (const {a,b} of gamesByWeek[w]||[]) {
+      const pa=a.points||0, pb=b.points||0; if (!pa && !pb) continue;
+      for (const [m,o] of [[a,b],[b,a]]) {
+        const p=m.points||0, op=o.points||0;
+        better("high",p,{rid:m.roster_id,opp:o.roster_id,w},(x,y)=>x>y);
+        better("low",p,{rid:m.roster_id,opp:o.roster_id,w},(x,y)=>x<y);
+        if (p<op) better("loss",p,{rid:m.roster_id,opp:o.roster_id,w},(x,y)=>x>y);
+        if (p>op) better("winlow",p,{rid:m.roster_id,opp:o.roster_id,w},(x,y)=>x<y);
+        const st=new Set(m.starters||[]);
+        for (const [pid,pts] of Object.entries(m.players_points||{})) if (st.has(pid)) better("player",pts,{pid,rid:m.roster_id,w},(x,y)=>x>y);
+      }
+      const [hi,lo]=pa>=pb?[a,b]:[b,a], mg=Math.abs(pa-pb);
+      better("blow",mg,{rid:hi.roster_id,opp:lo.roster_id,w},(x,y)=>x>y);
+      if (mg>0) better("close",mg,{rid:hi.roster_id,opp:lo.roster_id,w},(x,y)=>x<y);
+    }
+    const st = standings(through);
+    for (const t of Object.values(st)) {
+      let run=0, type=null;
+      t.results.forEach((res,i)=>{ if (res===type) run++; else {type=res; run=1;} const wk=i+1;
+        if (type==="W") better("wstreak",run,{rid:t.rid,w:wk,from:wk-run+1},(x,y)=>x>y);
+        if (type==="L") better("lstreak",run,{rid:t.rid,w:wk,from:wk-run+1},(x,y)=>x>y); });
+    }
+    return r;
+  }
+  const rec = records(W), recPrev = records(W-1);
+  const isNew = k => W>1 && rec[k] && rec[k].w===W && (!recPrev[k] || rec[k].v !== recPrev[k].v || rec[k].rid !== recPrev[k].rid);
+
+  // Player performances this week
+  const perf = [], benchPerf = [];
+  for (const m of d.matchups[W]||[]) {
+    if (m.matchup_id==null) continue;
+    const st = (m.starters||[]).filter(p=>p&&p!=="0");
+    for (const pid of st) { const pts=m.players_points?.[pid]||0, e=expected(pid); perf.push({pid,rid:m.roster_id,pts,exp:e,name:pName(pid),pos:pPos(pid),nfl:pNfl(pid)}); }
+    for (const pid of (m.players||[])) if (!st.includes(pid)) benchPerf.push({pid,rid:m.roster_id,pts:m.players_points?.[pid]||0,name:pName(pid),pos:pPos(pid),nfl:pNfl(pid),exp:expected(pid)});
+  }
+  const honor = [...perf].sort((a,b)=>b.pts-a.pts).slice(0,5);
+  const short = perf.filter(x=>x.exp!=null && x.exp>0).map(x=>({...x, gap:x.exp-x.pts})).sort((a,b)=>b.gap-a.gap);
+  const detention = short.slice(0,5);
+  const ghost = [...perf].sort((a,b)=>a.pts-b.pts || (b.exp||0)-(a.exp||0))[0];
+  const fools = short.find(x=>x.pid!==ghost?.pid) || null;
+  const sixth = [...benchPerf].sort((a,b)=>b.pts-a.pts)[0] || null;
+
+  // Transactions
+  const txs=(d.tx||[]).slice().sort((a,b)=>(b.status_updated||b.created||0)-(a.status_updated||a.created||0));
+  const trades=[], moves=[];
+  const pl = p => ({name:pName(p), pos:pPos(p), nfl:pNfl(p)});
+  for (const t of txs) {
+    const adds=Object.entries(t.adds||{}), drops=Object.entries(t.drops||{});
+    if (t.type==="trade" && t.status==="complete") {
+      trades.push((t.roster_ids||[]).map(rid=>({rid,
+        players: adds.filter(([,r])=>r===rid).map(([p])=>pl(p)),
+        picks: (t.draft_picks||[]).filter(dp=>dp.owner_id===rid).map(dp=>`${dp.season} round ${dp.round} pick${dp.roster_id!==rid?` (from ${tName(dp.roster_id)})`:""}`),
+        faab: (t.waiver_budget||[]).filter(b=>b.receiver===rid).map(b=>`$${b.amount} in FAAB`)})));
+    } else if (["waiver","free_agent"].includes(t.type) && ["complete","failed"].includes(t.status)) {
+      moves.push({kind: t.status==="failed" ? "denied" : t.type, rid:t.roster_ids?.[0], add:adds.map(([p])=>pl(p)), drop:drops.map(([p])=>pl(p)), bid:t.settings?.waiver_bid, note:t.metadata?.notes});
+    }
+  }
+
+  // Next week
+  const hasNextProj = Object.keys(d.projNext||{}).length>0;
+  function projectTeam(m){
+    if (hasNextProj && m) {
+      const pool=(m.players||[]).map(p=>({p,v:projOf(d.projNext,p)||0,elig:pElig(p)})).sort((a,b)=>b.v-a.v), used=new Set(); let t=0;
+      for (const slot of [...slotList].sort((a,b)=>SLOT_ELIG[a].length-SLOT_ELIG[b].length)) { const pk=pool.find(x=>!used.has(x.p)&&x.elig.some(e=>SLOT_ELIG[slot].includes(e))); if (pk){used.add(pk.p); t+=pk.v;} }
+      if (t>0) return t;
+    }
+    const s=stand[m?.roster_id]; if (!s||!s.scores.length) return 100;
+    const r3=s.scores.slice(-3); return .4*(s.pf/s.scores.length)+.6*(sum(r3)/r3.length);
+  }
+  const next = (gamesByWeek[W+1]||[]).map(({a,b})=>{
+    const pa=projectTeam(a), pb=projectTeam(b);
+    const [fav,dog,pf,pd]=pa>=pb?[a.roster_id,b.roster_id,pa,pb]:[b.roster_id,a.roster_id,pb,pa];
+    const spread=Math.max(.5,Math.round((pf-pd)*2)/2), prob=1/(1+Math.exp(-spread/14));
+    return {fav,dog,pf,pd,spread,total:Math.round(pf+pd),prob};
+  });
+  if (next.length) { const mn=Math.min(...next.map(n=>n.spread)), mx=Math.max(...next.map(n=>n.spread)); next.forEach(n=>{ n.gotw = n.spread===mn; n.biggest = n.spread===mx && mx!==mn; }); }
+
+  return {d,W,teams,tName,tNick,pName,pPos,pNfl,pPhoto,stand,standPrev,pow,powPrev,games,median,leagueAvg,rec,isNew,honor,detention,ghost,fools,sixth,expLabel,trades,moves,next,hasNextProj};
+}
+
+/* ---------------- The newsroom ---------------- */
+function write(M){
+  const R = rng(hash(M.d.leagueId+":"+M.W));
+  const pick = a => a[Math.floor(R()*a.length)];
+  const T = rid => esc(M.tName(rid)), N = rid => esc(M.tNick(rid));
+  const recStr = rid => M.stand[rid]?.rec || "";
+  const games = M.games;
+  const seasonHigh = M.rec.high && M.rec.high.w===M.W && M.W>1;
+
+  const scored = games.map(g=>{
+    let drama = g.margin/12;
+    if (g.type==="blowout") drama = 4+g.margin/15;
+    if (g.type==="nail") drama = 7-g.margin;
+    if (g.type==="upset") drama = Math.max(drama, 6.5+g.margin/30);
+    if (g.type==="tie") drama = 10;
+    if (seasonHigh && M.rec.high.rid===g.w) drama += 3;
+    return {g, drama};
+  }).sort((a,b)=>b.drama-a.drama);
+
+  const hed = g => { const w=T(g.w), l=T(g.l), m=f1(g.margin); const o = {
+    blowout:[`${w} flattens ${l} by ${m}`,`${w} runs ${l} off the field`,`No contest: ${w} ${f1(g.ws)}, ${l} ${f1(g.ls)}`],
+    upset:[`${w} stuns ${l}`,`Shock on the gridiron: ${w} topples ${l}`,`${l} tripped up by ${w}`],
+    nail:[`${w} survives ${l} by ${m}`,`Photo finish: ${w} edges ${l}`,`${w} escapes ${l} by a whisker`],
+    tie:[`Dead even: ${w} and ${l} tie at ${f2(g.ws)}`],
+    default:[`${w} takes down ${l}, ${f1(g.ws)} to ${f1(g.ls)}`,`${w} handles ${l}`,`${w} beats ${l} by ${m}`] }[g.type]; return pick(o); };
+  const deck = g => { const w=N(g.w), l=N(g.l), m=Math.round(g.margin), ls=M.stand[g.l]; const o = {
+    blowout:[`${poss(w)} ${m}-point romp leaves ${l} in the dust`,`${w} buries ${l} and doesn't look back`,`${l} never had a chance against ${w}`],
+    upset:[`${w} pulls the shocker nobody saw coming`,`${l} came in favored and left embarrassed`],
+    nail:[`${w} survives ${l} by ${f1(g.margin)} in a white-knuckle finish`,`${l} comes up ${f1(g.margin)} short in a thriller`],
+    tie:[`Neither ${w} nor ${l} could find the extra point`],
+    default:[`${w} handles ${l} without much fuss`,`${w} gets past ${l} by ${m}`,`${w} does enough against ${l}`] }[g.type];
+    let s = pick(o);
+    if (ls && ls.streakType==="L" && ls.streakLen>=3 && g.type!=="tie") s += `; ${poss(l)} skid hits ${ls.streakLen}`;
+    return s; };
+  const verb = g => g.tie ? "tied" : g.margin>35 ? "demolished" : g.margin>20 ? "ran past" : g.margin>10 ? "beat" : g.margin>4 ? "held off" : "edged";
+
+  // Lead
+  let lead = null;
+  if (scored.length) {
+    const g = scored[0].g, ps=[];
+    ps.push(g.tie ? `${T(g.w)} and ${T(g.l)} finished Week ${M.W} tied at ${f2(g.ws)} apiece, and nobody went home happy.` :
+      `${T(g.w)} (${recStr(g.w)}) beat ${T(g.l)} (${recStr(g.l)}) ${f2(g.ws)} to ${f2(g.ls)} in Week ${M.W}.` +
+      (g.type==="upset" ? ` Going in, ${T(g.l)} sat ${ord(M.powPrev[g.l]?.rank||0)} in the power rankings and ${T(g.w)} sat ${ord(M.powPrev[g.w]?.rank||0)}.` : "") +
+      (seasonHigh && M.rec.high.rid===g.w ? ` It is the highest score anyone in the league has posted this season.` : ""));
+    const t1=g.wl.top[0], t2=g.wl.top[1], o1=g.ll.top[0];
+    if (t1) ps.push(`${esc(M.pName(t1.p))} carried ${T(g.w)} with ${f1(t1.pts)} points` + (t2?`, and ${esc(M.pName(t2.p))} chipped in ${f1(t2.pts)}.`:".") +
+      (o1 ? ` On the other side, ${esc(M.pName(o1.p))} put up ${f1(o1.pts)} for ${T(g.l)}, ${g.margin>20?"which barely dented the gap":"which kept it close"}.` : ""));
+    if (!g.tie && g.ll.left > g.margin) { const bb=g.ll.bench.sort((a,b)=>b.pts-a.pts)[0]; ps.push(`The part ${N(g.l)} will think about all week: ${f1(g.ll.left)} points sat on the bench. A better lineup wins this game.` + (bb?` ${esc(M.pName(bb.p))} scored ${f1(bb.pts)} as a reserve.`:"")); }
+    else { const s=M.stand[g.w]; ps.push(`${T(g.w)} is now ${recStr(g.w)}, ${ord(s.rank)} in the standings` + (s.streakType==="W"&&s.streakLen>=2?`, with ${s.streakLen} straight wins.`:".") + ` ${T(g.l)} falls to ${recStr(g.l)}.`); }
+    const photos = [], person = x => !["DEF","K"].includes(M.pPos(x));
+    const tp = g.wl.top.find(x=>person(x.p));
+    if (tp) photos.push({pid:tp.p, rid:g.w, pts:tp.pts});
+    const top = M.honor.find(x=>person(x.pid)); if (top && top.pid!==tp?.p) photos.push({pid:top.pid, rid:top.rid, pts:top.pts});
+    const cap = photos.length===2 ? `${esc(M.pName(photos[0].pid))} (${f1(photos[0].pts)}) and ${esc(M.pName(photos[1].pid))} (${f1(photos[1].pts)}, the week's top starter)` : photos.length ? `${esc(M.pName(photos[0].pid))} scored ${f1(photos[0].pts)} for ${T(photos[0].rid)}` : "";
+    lead = {kicker:{blowout:"Rout",upset:"Upset",nail:"Thriller",tie:"Deadlock",default:"Page one"}[g.type], hed:hed(g), deck:deck(g), ps, photos, cap};
+  }
+
+  // Roundup
+  const roundup = games.map(g => { const t=g.wl.top[0]; return `${T(g.w)}${t?` got ${f1(t.pts)} from ${esc(M.pName(t.p))} and`:""} ${verb(g)} ${T(g.l)} ${f1(g.ws)}-${f1(g.ls)}.`; });
+  const unbeaten = Object.values(M.stand).filter(s=>s.l===0&&s.t===0&&s.gp>=2), winless=Object.values(M.stand).filter(s=>s.w===0&&s.gp>=2);
+  const list = a => a.length<=1 ? a.join("") : a.slice(0,-1).join(", ")+" and "+a.at(-1);
+  if (unbeaten.length) roundup.push(`${list(unbeaten.map(s=>T(s.rid)))} ${unbeaten.length===1?"is the last unbeaten team":"are still unbeaten"} at ${unbeaten[0].rec}.`);
+  if (winless.length) roundup.push(`${list(winless.map(s=>T(s.rid)))} ${winless.length===1?"is still looking for a first win":"are still looking for a first win"}.`);
+
+  // Briefs
+  const briefs = [];
+  if (M.trades.length) { const t=M.trades[0]; briefs.push({k:"Trade wire", h:`${T(t[0].rid)} and ${T(t[1]?.rid)} make a deal`, p:t.map(s=>`${T(s.rid)} gets ${esc([...s.players.map(p=>p.name),...s.picks,...s.faab].join(", ")||"nothing listed")}`).join(". ")+"."}); }
+  const hot = Object.values(M.stand).filter(s=>s.streakType==="W"&&s.streakLen>=3).sort((a,b)=>b.streakLen-a.streakLen)[0];
+  if (hot) briefs.push({k:"Streaking", h:`${T(hot.rid)} wins ${hot.streakLen} straight`, p:`Now ${hot.rec} and ${ord(hot.rank)} in the standings.`});
+  const cold = Object.values(M.stand).filter(s=>s.streakType==="L"&&s.streakLen>=3).sort((a,b)=>b.streakLen-a.streakLen)[0];
+  if (cold) briefs.push({k:"Sinking", h:`${T(cold.rid)} drops ${cold.streakLen} in a row`, p:`${f1(M.stand[cold.rid].pf)} points scored on the season, ${ord(cold.rank)} in the table.`});
+  if (M.sixth && M.sixth.pts>15) briefs.push({k:"Bench report", h:`${esc(M.sixth.name)} scores ${f1(M.sixth.pts)} on ${T(M.sixth.rid)}'s bench`, p:`The best performance nobody started this week.`});
+
+  // Recaps
+  const recaps = games.map(g=>{
+    const t=g.wl.top[0], o=g.ll.top[0], ps=[];
+    ps.push(g.tie ? `${T(g.w)} and ${T(g.l)} split the difference at ${f2(g.ws)}.` : pick([`${T(g.w)} beat ${T(g.l)} by ${f1(g.margin)}.`,`${T(g.w)} got past ${T(g.l)}, ${f2(g.ws)} to ${f2(g.ls)}.`,`${T(g.l)} couldn't keep pace with ${T(g.w)}, falling ${f2(g.ws)} to ${f2(g.ls)}.`]) +
+      (t?` ${esc(M.pName(t.p))} led the way with ${f1(t.pts)}`+(g.wl.top[1]?`, and ${esc(M.pName(g.wl.top[1].p))} added ${f1(g.wl.top[1].pts)}.`:"."):""));
+    let s2 = o ? `${esc(M.pName(o.p))} scored ${f1(o.pts)} for ${T(g.l)}.` : "";
+    if (!g.tie && g.ll.left > g.margin) s2 += ` ${N(g.l)} left ${f1(g.ll.left)} on the bench, more than the margin.`;
+    else if (g.ws < M.median) s2 += ` ${T(g.w)} won with a below-median score. Nobody's giving it back.`;
+    else if (g.ls > M.median) s2 += ` ${T(g.l)} beat the weekly median and still lost. Rough draw.`;
+    if (g.wl.left < .01) s2 += ` ${T(g.w)} started the best possible lineup.`;
+    ps.push(s2);
+    return {g, hed:hed(g), deck:deck(g), ps};
+  });
+
+  // Power blurbs
+  const powRows = Object.values(M.pow).sort((a,b)=>a.rank-b.rank).map(r=>{
+    const prev=M.powPrev[r.rid]?.rank, mv=prev?prev-r.rank:0, s=M.stand[r.rid], last=s.scores.at(-1)||0;
+    let b;
+    if (r.rank===1) b = pick([`Best all-play record in the league at ${n1(r.apW)}-${n1(r.apG-r.apW)}.`,`The team everyone checks first on Sunday night.`]);
+    else if (mv>=3) b=`Up ${mv} spots after ${aN(last)} ${f1(last)}-point week.`;
+    else if (mv<=-3) b=`Down ${-mv}. The ${f1(last)} last week didn't help.`;
+    else if (s.streakType==="L"&&s.streakLen>=3) b=`${s.streakLen} straight losses and counting.`;
+    else if (s.streakType==="W"&&s.streakLen>=3) b=`${s.streakLen} wins in a row.`;
+    else if (r.ap>s.pct+.2) b=`Scores like a contender. The record says otherwise.`;
+    else if (s.pct>r.ap+.2) b=`The record is better than the scoring. Enjoy it while it lasts.`;
+    else b=`Averaging ${f1(r.recent)} over the last ${Math.min(3,s.scores.length)}.`;
+    return {...r, mv, prev, s, blurb:b};
+  });
+
+  // Team awards
+  const awards=[];
+  if (games.length) {
+    const byScore=[]; for (const g of games){ byScore.push({rid:g.w,v:g.ws,lu:g.wl,won:!g.tie,lost:false}); byScore.push({rid:g.l,v:g.ls,lu:g.ll,won:false,lost:!g.tie}); }
+    byScore.sort((a,b)=>b.v-a.v);
+    awards.push({k:"Top gun", n:T(byScore[0].rid), fig:f1(byScore[0].v), p:"Highest score of the week."});
+    awards.push({k:"Basement", n:T(byScore.at(-1).rid), fig:f1(byScore.at(-1).v), p:"Lowest score of the week."});
+    const blow=games.slice().sort((a,b)=>b.margin-a.margin)[0]; awards.push({k:"Biggest blowout", n:`${T(blow.w)} over ${T(blow.l)}`, fig:"+"+f1(blow.margin), p:`${f1(blow.ws)} to ${f1(blow.ls)}.`});
+    const close=games.slice().sort((a,b)=>a.margin-b.margin)[0]; awards.push({k:"Closest shave", n:`${T(close.w)} over ${T(close.l)}`, fig:f2(close.margin), p:"Smallest margin of the week."});
+    const bl=byScore.slice().sort((a,b)=>b.lu.left-a.lu.left)[0]; if (bl.lu.left>0) awards.push({k:"Bench blunder", n:T(bl.rid), fig:f1(bl.lu.left), p:"Points left on the bench."});
+    const perfect=byScore.filter(x=>x.lu.left<.01).sort((a,b)=>b.v-a.v)[0]; if (perfect) awards.push({k:"Manager of the week", n:T(perfect.rid), fig:f1(perfect.v), p:"Started the best possible lineup."});
+    const unl=byScore.filter(x=>x.lost).sort((a,b)=>b.v-a.v)[0]; if (unl && unl.v>M.median) awards.push({k:"Wrong place, wrong time", n:T(unl.rid), fig:f1(unl.v), p:`Highest score in a loss. Would have beaten ${byScore.filter(x=>x.v<unl.v).length} teams.`});
+    const luck=byScore.filter(x=>x.won).sort((a,b)=>a.v-b.v)[0]; if (luck && luck.v<M.median) awards.push({k:"Horseshoe", n:T(luck.rid), fig:f1(luck.v), p:"Lowest score in a win."});
+  }
+
+  // Player awards
+  const gameOf = rid => games.find(g=>g.w===rid||g.l===rid);
+  const pAwards=[];
+  const star=M.honor[0];
+  if (star) pAwards.push({key:"star", title:CONFIG.awards.star, why:"The week's best starter", p:star, stats:[["Scored",f1(star.pts),"gold"], ...(star.exp!=null?[[M.expLabel,f1(star.exp)]]:[])],
+    text:`${esc(star.name)} put up ${f1(star.pts)} for ${T(star.rid)}, more than anyone else in a starting lineup.` + (star.exp!=null?` That's ${f1(star.pts-star.exp)} over ${M.expLabel==="Projected"?"his projection":"his season average"}.`:"") + (()=>{const g=gameOf(star.rid); return g&&!g.tie ? (g.w===star.rid?` ${T(star.rid)} won by ${f1(g.margin)}.`:` It still wasn't enough. ${T(star.rid)} lost by ${f1(g.margin)}.`) : "";})()});
+  if (M.ghost) { const x=M.ghost; pAwards.push({key:"ghost", title:CONFIG.awards.ghost, why:"The starter who did the least", p:x, stats:[...(x.exp!=null?[[M.expLabel,f1(x.exp)]]:[]),["Scored",f1(x.pts),"red"]],
+    text:pick([`${esc(x.name)} started for ${T(x.rid)} and returned ${f1(x.pts)} points.`,`${T(x.rid)} put ${esc(x.name)} in the lineup and got ${f1(x.pts)} back.`]) + (x.exp!=null?` He was supposed to be good for ${f1(x.exp)}.`:"") + ` An empty roster spot would have done about as well.`}); }
+  if (M.fools) { const x=M.fools, g=gameOf(x.rid); pAwards.push({key:"fools", title:CONFIG.awards.fools, why:"Started the player who fell furthest short", p:x, stats:[[M.expLabel,f1(x.exp)],["Scored",f1(x.pts)],["Short by",f1(x.gap),"red"]],
+    text:`${esc(x.name)} looked like a sure thing at ${f1(x.exp)}. He delivered ${f1(x.pts)} for ${T(x.rid)}.` + (g&&g.l===x.rid&&!g.tie&&x.gap>g.margin?` That shortfall was bigger than ${T(x.rid)}'s ${f1(g.margin)}-point loss.`:g&&g.w===x.rid?` ${T(x.rid)} won anyway, so all is forgiven. Mostly.`:"")}); }
+  if (M.sixth) { const x=M.sixth, g=gameOf(x.rid); const lu = g ? (g.w===x.rid?g.wl:g.ll) : null; pAwards.push({key:"sixth", title:CONFIG.awards.sixth, why:"Best performance off the bench", p:x, stats:[["Scored",f1(x.pts),"gold"],["Bench pts lost",f1(lu?.left||0),"red"]],
+    text:`${esc(x.name)} scored ${f1(x.pts)} on the bench for ${T(x.rid)}.` + (g&&g.l===x.rid&&!g.tie&&lu.left>g.margin?` Starting him flips a ${f1(g.margin)}-point loss into a win.`:` Nobody noticed. Everybody will now.`)}); }
+
+  // Obituaries
+  const obitLines = [
+    (x,t)=>`${esc(x.name)} passed quietly in the starting lineup of ${t}. Final line: ${f1(x.pts)} points. Survived by a bench that would have done better.`,
+    (x,t)=>`${esc(x.name)}, ${esc(x.pos)}${x.nfl?" of "+esc(x.nfl):""}, was laid to rest by ${t} this week after ${aN(x.pts)} ${f1(x.pts)}-point showing. In lieu of flowers, the family asks that you check the injury report.`,
+    (x,t)=>`${t} mourns the Week ${M.W} performance of ${esc(x.name)}. ${f1(x.pts)} points, all told. Services will be held on the waiver wire.`,
+    (x,t)=>`We gather today for ${esc(x.name)}. ${f1(x.pts)} points. ${t} saw the projection and believed it. ${t} asks for privacy and a waiver claim.`,
+    (x,t)=>`Lights out for ${esc(x.name)}. ${f1(x.pts)} points, and that was the whole thing. Please do not ask ${t} about the bench.`];
+  const order = Array.from({length:obitLines.length},(_,i)=>i).sort(()=>R()-.5);
+  const obits = M.detention.slice(0,4).map((x,i)=>({x, text:obitLines[order[i]](x, T(x.rid))}));
+
+  return {lead, roundup:roundup.join(" "), briefs:briefs.slice(0,3), recaps, powRows, awards, pAwards, obits, hed, deck};
+}
+
+/* ---------------- Rendering helpers ---------------- */
+const initials = s => String(s||"?").replace(/[^A-Za-z0-9 ]/g,"").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase() || "?";
+function photo(src, label, cls){ return `<span class="ph ${cls}${src?"":" nophoto"}" aria-hidden="true">${esc(initials(label))}${src?`<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:""}</span>`; }
+function wirePhotos(root){
+  root.querySelectorAll(".ph img").forEach(img=>{
+    const fail = () => { img.parentNode?.classList.add("nophoto"); img.remove(); };
+    img.addEventListener("error", fail);
+    if (img.complete && img.naturalWidth===0 && img.src) fail();
+  });
+}
+
+/* ---------------- Pages ---------------- */
+const PAGES = [["front","Front"],["honor","Honor Roll"],["games","Games"],["awards","Awards"],["rankings","Rankings"],["back","Back Page"]];
+
+function render(M){
+  const C = write(M), L = M.d.league, T = rid => esc(M.tName(rid));
+  const tPh = (rid, cls) => photo(M.teams[rid]?.avatar, M.tName(rid), cls+" round");
+  const pPh = (pid, label, cls) => photo(M.pPhoto(pid), label, cls + (isNaN(pid)?" logo":""));
+  const pos = x => x.pos ? `<span class="pos">${esc(x.pos)}</span>` : "";
+  const name = CONFIG.paperName || ((L.name||"League").trim() + (/(gazette|times|post|herald|tribune|journal|ledger|courier|chronicle)$/i.test(L.name||"")?"":" Gazette"));
+  $("#plate").textContent = name; document.title = name;
+  const dateStr = M.d.editionDate ? M.d.editionDate.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}) : `${L.season} season`;
+  const late = M.d.snapshot ? M.d.inProgress : M.d.live && M.W===M.d.state.week && String(L.season)===String(M.d.state.season) && !["Tue","Wed"].includes(NY_DAY());
+  $("#ribbon").innerHTML = `<span>Vol. ${esc(L.season)}</span><span>Week ${M.W}</span><span>${esc(dateStr)}</span><span>Price: one bench slot</span>`;
+  $("#ear-l").textContent = `${Object.keys(M.teams).length} clubs · ${M.d.live?"Live from Sleeper":"Sample league"}`;
+  $("#ear-r").textContent = late ? "Late edition · games in progress" : "Final edition";
+  $("#foot-r").textContent = `${L.season} season · Week ${M.W}`;
+  const goto = (p,label) => `<p class="fist">☞ <button type="button" data-goto="${p}">${label}</button></p>`;
+  const S = M.stand, sortedStand = Object.values(S).sort((a,b)=>a.rank-b.rank);
+
+  /* FRONT */
+  const g0 = M.games, hi = g0.length ? [...g0].sort((a,b)=>b.ws-a.ws)[0] : null;
+  const lowT = g0.length ? g0.flatMap(g=>[[g.l,g.ls],[g.w,g.ws]]).sort((a,b)=>a[1]-b[1])[0] : null;
+  const close = g0.length ? [...g0].sort((a,b)=>a.margin-b.margin)[0] : null, blow = g0.length ? [...g0].sort((a,b)=>b.margin-a.margin)[0] : null;
+  const benchTotal = sum(g0.flatMap(g=>[g.wl.left,g.ll.left]));
+  const numbers = g0.length ? `<div class="numbers"><h3>The week in numbers</h3><div class="numgrid">
+    <div class="num"><div class="k">High score</div><div class="v">${f1(hi.ws)}</div><div class="w">${T(hi.w)}</div></div>
+    <div class="num bad"><div class="k">Low score</div><div class="v">${f1(lowT[1])}</div><div class="w">${T(lowT[0])}</div></div>
+    <div class="num"><div class="k">Closest game</div><div class="v">${f1(close.margin)}<small>PTS</small></div><div class="w">${T(close.w)} ${f1(close.ws)}, ${T(close.l)} ${f1(close.ls)}</div></div>
+    <div class="num"><div class="k">Biggest blowout</div><div class="v">${f1(blow.margin)}<small>PTS</small></div><div class="w">${T(blow.w)} ${f1(blow.ws)}, ${T(blow.l)} ${f1(blow.ls)}</div></div>
+    <div class="num"><div class="k">League average</div><div class="v">${f1(M.leagueAvg)}</div><div class="w">Median ${f1(M.median)}</div></div>
+    <div class="num bad"><div class="k">Left on benches</div><div class="v">${f1(benchTotal)}</div><div class="w">Points, league-wide</div></div>
+  </div></div>` : "";
+  const mini = `<div><div class="label">Standings</div><div class="tbl-wrap"><table class="agate mini"><thead><tr><th class="l">#</th><th class="l">Team</th><th>W-L</th><th>Strk</th></tr></thead><tbody>
+    ${sortedStand.map(s=>`<tr><td class="l">${s.rank}</td><td class="l"><span class="teamcell">${tPh(s.rid,"xs")}${T(s.rid)}</span></td><td>${s.rec}</td><td class="${s.streakType==="W"?"up":s.streakType==="L"?"dn":"eq"}">${s.streakType==="W"?"▲":s.streakType==="L"?"▼":""} ${s.streakLen||"—"}</td></tr>`).join("")}
+  </tbody></table></div>${goto("rankings","Power rankings on the Rankings page")}</div>`;
+  const leadHtml = C.lead ? `<article class="lead">
+      <div class="kicker">${esc(C.lead.kicker)}</div>
+      <h1 class="lead-hed">${C.lead.hed}</h1>
+      <p class="deck">${C.lead.deck}</p>
+      <div class="byline"><span>By the ${esc(name)} sports desk</span><span>Week ${M.W}</span></div>
+      ${C.lead.photos.length ? `<figure><div class="lead-photos">${C.lead.photos.map(p=>pPh(p.pid, M.pName(p.pid), "lg")).join("")}</div><figcaption>${C.lead.cap}</figcaption></figure>` : ""}
+      <div class="body">${C.lead.ps.map((p,i)=>`<p${i===0?' class="dropcap"':""}>${p}</p>`).join("")}</div>
+    </article>` : `<article class="lead"><h1 class="lead-hed">No games this week</h1><p class="deck">Check back once Week ${M.W} kicks off.</p></article>`;
+  const front = `<section class="front">
+    <div class="main">${leadHtml}
+      ${C.briefs.length?`<div class="briefs">${C.briefs.map(b=>`<div class="brief"><div class="kicker">${esc(b.k)}</div><h4>${b.h}</h4><p>${b.p}</p></div>`).join("")}</div>`:""}
+      <div class="banner"><h2>Around the League</h2></div>
+      <div class="body"><p class="dropcap">${C.roundup || "No games were played this week."}</p></div>
+      <div class="label" style="margin-top:18px">This week</div>
+      <ul class="thisweek">${C.recaps.map(r=>`<li><div class="hed">${T(r.g.w)} ${r.g.tie?"tie":"def."} ${T(r.g.l)}</div><div class="dk">${r.deck}</div><div class="ln">${f1(r.g.ws)} — ${f1(r.g.ls)} &nbsp;|&nbsp; margin: ${f1(r.g.margin)}</div></li>`).join("")}</ul>
+      ${goto("games","Full recaps and box scores on the Games page")}
+    </div>
+    <aside class="side">${numbers}${mini}</aside>
+  </section>`;
+
+  /* HONOR ROLL */
+  const pcard = (x,i,det) => {
+    const e = x.exp, scale = Math.max(x.pts, e||0, 1)*1.12;
+    return `<div class="pcard${det?" det":""}"><span class="rank">${i+1}</span>${pPh(x.pid, x.name, "md round")}
+      <div class="pname">${esc(x.name)} ${pos(x)}</div><div class="pteam">${T(x.rid)}</div>
+      <div class="big">${det ? "−"+f1(x.gap) : f1(x.pts)}</div>
+      <div class="bar"><i style="width:${Math.max(2,Math.min(100,x.pts/scale*100))}%"></i>${e!=null?`<b style="left:${Math.min(100,e/scale*100)}%"></b>`:""}</div>
+      <div class="cap">${det ? `Scored ${f1(x.pts)} of ${f1(e)}` : e!=null ? `${M.expLabel} ${f1(e)}` : `No projection`}</div></div>`;
+  };
+  const honor = `<div class="banner"><h2>Honor Roll</h2></div><p class="sub">The week's highest-scoring starters, whichever lineup they were in.</p>
+    <div class="cards">${M.honor.map((x,i)=>pcard(x,i,false)).join("")}</div>
+    <div class="banner"><h2>Detention</h2></div><p class="sub">The starters who missed their ${M.expLabel==="Projected"?"projection":"season average"} by the most.</p>
+    ${M.detention.length ? `<div class="cards">${M.detention.map((x,i)=>pcard(x,i,true)).join("")}</div>` : `<p class="empty" style="text-align:center">Nobody to keep after class. Detention starts once there's a projection or a week of history to compare against.</p>`}`;
+
+  /* GAMES */
+  const boxTable = (rid, lu) => `<div><div class="label">${T(rid)}</div><div class="tbl-wrap"><table class="agate"><tbody>
+    ${lu.slots.map(s=>`<tr><td class="slot">${esc(SLOT_LABEL[s.slot]||s.slot)}</td><td class="l">${s.p&&s.p!=="0"?esc(M.pName(s.p)):"<i>Empty</i>"} <span class="pt">${esc(M.pNfl(s.p)||"")}</span></td><td>${f2(s.pts)}</td></tr>`).join("")}
+    <tr class="tot"><td class="slot"></td><td class="l">Total</td><td>${f2(lu.actual)}</td></tr>
+    ${lu.bench.slice(0,6).map(b=>`<tr class="bench"><td class="slot">BN</td><td class="l">${esc(M.pName(b.p))}</td><td>${f2(b.pts)}</td></tr>`).join("")}
+    <tr><td class="slot"></td><td class="l pt">Best possible lineup</td><td class="pt">${f2(lu.optimal)}</td></tr>
+  </tbody></table></div></div>`;
+  const gamesHtml = `<div class="banner"><h2>Game Recaps</h2></div><p class="sub">Week ${M.W}, every matchup.</p>` + (C.recaps.map(r=>{ const g=r.g; return `<article class="game">
+      <div class="kicker">${{blowout:"Rout",upset:"Upset",nail:"Thriller",tie:"Deadlock",default:"Final"}[g.type]}</div>
+      <h3>${r.hed}</h3><p class="dk">${r.deck}</p>
+      <div class="scoreline">
+        <div class="side-t ${g.tie?"":"win"}">${tPh(g.w,"sm")}<div><div class="nm">${T(g.w)}</div><div class="pt">${S[g.w]?.rec||""}</div></div><div class="sc">${f1(g.ws)}</div></div>
+        <div class="vs">${g.tie?"tie":"def."}</div>
+        <div class="side-t r ${g.tie?"":"lose"}">${tPh(g.l,"sm")}<div><div class="nm">${T(g.l)}</div><div class="pt">${S[g.l]?.rec||""}</div></div><div class="sc">${f1(g.ls)}</div></div>
+      </div>
+      <div class="body">${r.ps.map(p=>`<p>${p}</p>`).join("")}</div>
+      <details class="box"><summary>Box score</summary><div class="boxgrid">${boxTable(g.w,g.wl)}${boxTable(g.l,g.ll)}</div></details>
+    </article>`; }).join("") || `<p class="empty">No games this week.</p>`);
+
+  /* AWARDS */
+  const awardsHtml = `<div class="banner"><h2>Weekly Awards</h2></div>
+    ${C.pAwards.map(a=>`<div class="awcard"><div class="title">${esc(a.title)}</div><div class="why">${esc(a.why)}</div>
+      <div class="awrow">${pPh(a.p.pid, a.p.name, "md")}<div style="min-width:0"><div class="pname" style="margin:0">${esc(a.p.name)} ${pos(a.p)}</div><div class="pteam">${T(a.p.rid)}</div>
+      <div class="stats">${a.stats.map(([k,v,c])=>`<div class="stat"><div class="k">${esc(k)}</div><div class="v ${c||""}">${v}</div></div>`).join("")}</div></div></div>
+      <p>${a.text}</p></div>`).join("")}
+    <div class="banner"><h2>Club Honors</h2></div>
+    <div class="teamawards">${C.awards.map(a=>`<div class="ta"><div class="kicker">${esc(a.k)}</div><div class="nm">${a.n}</div><div class="fig">${a.fig}</div><p>${a.p}</p></div>`).join("")}</div>`;
+
+  /* RANKINGS */
+  const rankings = `<div class="banner"><h2>Power Rankings</h2></div><p class="sub">All-play record, wins, points and recent form, weighed together.</p>
+    ${C.powRows.map(r=>`<div class="prow"><div class="rk">${r.rank}</div>${tPh(r.rid,"sm")}<div style="min-width:0"><div class="nm">${T(r.rid)}</div><div class="meta">${r.s.rec} · ${f1(r.s.pf)} PF · all-play ${n1(r.apW)}-${n1(r.apG-r.apW)}</div></div>
+      <div class="mv ${r.mv>0?"up":r.mv<0?"dn":"eq"}">${r.prev?(r.mv>0?"▲ "+r.mv:r.mv<0?"▼ "+(-r.mv):"—"):"New"}</div><div class="blurb">${r.blurb}</div></div>`).join("")}
+    <div class="banner"><h2>The Standings</h2></div>
+    <div class="tbl-wrap"><table class="agate"><thead><tr><th class="l">#</th><th class="l">Team</th><th>W</th><th>L</th>${sortedStand.some(s=>s.t)?"<th>T</th>":""}<th>PF</th><th>PA</th><th>Strk</th></tr></thead><tbody>
+    ${sortedStand.map(s=>`<tr><td class="l">${s.rank}</td><td class="l"><span class="teamcell">${tPh(s.rid,"xs")}${T(s.rid)}</span></td><td>${s.w}</td><td>${s.l}</td>${sortedStand.some(x=>x.t)?`<td>${s.t}</td>`:""}<td>${f1(s.pf)}</td><td>${f1(s.pa)}</td><td class="${s.streakType==="W"?"up":s.streakType==="L"?"dn":"eq"}">${s.streak}</td></tr>`).join("")}
+    </tbody></table></div>`;
+
+  /* BACK PAGE */
+  const R = M.rec, stamp = k => M.isNew(k) ? `<span class="stamp">New record</span>` : "";
+  const recRow = (k,label,who,v) => R[k] ? `<div class="rec"><div class="k">${label}${stamp(k)}</div><div class="who">${who}</div><div class="v">${v}</div></div>` : "";
+  const records = [
+    recRow("high","Highest score",`<b>${T(R.high?.rid)}</b> vs ${T(R.high?.opp)} · Wk ${R.high?.w}`, f1(R.high?.v||0)),
+    recRow("low","Lowest score",`<b>${T(R.low?.rid)}</b> vs ${T(R.low?.opp)} · Wk ${R.low?.w}`, f1(R.low?.v||0)),
+    recRow("blow","Biggest blowout",`<b>${T(R.blow?.rid)}</b> over ${T(R.blow?.opp)} · Wk ${R.blow?.w}`, "+"+f1(R.blow?.v||0)),
+    recRow("close","Closest game",`<b>${T(R.close?.rid)}</b> over ${T(R.close?.opp)} · Wk ${R.close?.w}`, "+"+f2(R.close?.v||0)),
+    recRow("loss","Most points in a loss",`<b>${T(R.loss?.rid)}</b> to ${T(R.loss?.opp)} · Wk ${R.loss?.w}`, f1(R.loss?.v||0)),
+    recRow("winlow","Fewest points in a win",`<b>${T(R.winlow?.rid)}</b> over ${T(R.winlow?.opp)} · Wk ${R.winlow?.w}`, f1(R.winlow?.v||0)),
+    recRow("player","Best player game",`<b>${esc(M.pName(R.player?.pid))}</b> for ${T(R.player?.rid)} · Wk ${R.player?.w}`, f1(R.player?.v||0)),
+    recRow("wstreak","Longest win streak",`<b>${T(R.wstreak?.rid)}</b> weeks ${R.wstreak?.from}-${R.wstreak?.w}`, R.wstreak?.v),
+    recRow("lstreak","Longest losing streak",`<b>${T(R.lstreak?.rid)}</b> weeks ${R.lstreak?.from}-${R.lstreak?.w}`, R.lstreak?.v)
+  ].join("");
+  const obits = C.obits.length ? C.obits.map(({x,text})=>`<div class="obit">${pPh(x.pid,x.name,"sm")}<div style="min-width:0"><h4><span class="cross">✝</span>${esc(x.name)}</h4><div class="dates">${M.expLabel} ${f1(x.exp)} — Scored ${f1(x.pts)}</div><p>${text}</p></div></div>`).join("") : `<p class="empty">No one to bury this week.</p>`;
+  const previews = M.next.length ? M.next.map(n=>`<div class="preview">
+      <div class="pv"><div class="t">${tPh(n.fav,"md")}<div class="nm">${T(n.fav)}</div><div class="pj">${f1(n.pf)}</div></div>
+      <div class="spread">−${n.spread}</div>
+      <div class="t">${tPh(n.dog,"md")}<div class="nm">${T(n.dog)}</div><div class="pj">${f1(n.pd)}</div></div></div>
+      <div class="pbar"><i style="left:0;width:${(n.prob*100).toFixed(0)}%"></i></div>
+      <div class="chips"><span class="chip">${T(n.fav)} favored · ${(n.prob*100).toFixed(0)}%</span><span class="chip">O/U ${n.total}</span>${n.gotw?`<span class="chip solid">Game of the week</span>`:""}${n.biggest?`<span class="chip solid">Biggest spread</span>`:""}</div>
+    </div>`).join("") : `<p class="empty">No Week ${M.W+1} schedule posted yet.</p>`;
+  const pl = p => `${esc(p.name)} <span class="pt">${esc([p.pos,p.nfl].filter(Boolean).join("/"))}</span>`;
+  const tradesHtml = M.trades.length ? M.trades.map(t=>`<div class="trade">${t.map((s,i)=>`${i?'<div class="swap">⇅</div>':""}<div class="gets"><b>${T(s.rid)}</b> <i>gets</i><ul>${[...s.players.map(pl),...s.picks.map(esc),...s.faab.map(esc)].map(x=>`<li>${x}</li>`).join("")||"<li>Nothing listed</li>"}</ul></div>`).join("")}</div>`).join("") : `<p class="empty">No trades this week.</p>`;
+  const movesHtml = M.moves.length ? `<ul class="tx">${M.moves.map(m=>`<li class="${m.kind}"><span class="tag ${m.kind==="denied"?"denied":""}">${m.kind==="denied"?"Claim denied":m.kind==="waiver"?"Waiver":"Free agent"}</span><span class="what"><b>${T(m.rid)}</b> ${m.kind==="denied"?"missed on":"adds"} ${m.add.map(pl).join(", ")||"—"}${m.bid!=null&&m.bid!==0?` ($${m.bid})`:""}${m.kind!=="denied"&&m.drop.length?`, drops ${m.drop.map(pl).join(", ")}`:""}${m.kind==="denied"&&m.note?`. ${esc(m.note)}`:""}</span></li>`).join("")}</ul>` : `<p class="empty">No pickups logged for Week ${M.W}.</p>`;
+  const back = `<div class="grid2">
+      <section><div class="banner"><h2>Obituaries</h2></div>${obits}</section>
+      <section><div class="banner"><h2>Season Record Book</h2></div>${records}</section>
+    </div>
+    <div class="banner"><h2>Next Week's Preview</h2></div><p class="sub">Made-up lines from ${M.hasNextProj?"Sleeper's projections":"each team's recent scoring"}. The desk takes no bets.</p>
+    <div class="grid2">${previews}</div>
+    <div class="grid2">
+      <section><div class="banner"><h2>Trades</h2></div>${tradesHtml}</section>
+      <section><div class="banner"><h2>Transactions</h2></div>${movesHtml}</section>
+    </div>`;
+
+  const html = {front, honor, games:gamesHtml, awards:awardsHtml, rankings, back};
+  $("#edition").innerHTML = PAGES.map(([id])=>`<section class="page" id="page-${id}" role="tabpanel" aria-labelledby="tab-${id}" hidden>${html[id]}</section>`).join("");
+  wirePhotos($("#edition"));
+  $("#edition").querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.goto,true)));
+  show(current, false);
+}
+
+let current = (location.hash||"").replace("#","");
+if (!PAGES.some(([id])=>id===current)) current = "front";
+function buildTabs(){
+  $("#tabs").innerHTML = PAGES.map(([id,label])=>`<button class="tab" role="tab" id="tab-${id}" aria-controls="page-${id}" data-tab="${id}" type="button">${label}</button>`).join("");
+  $("#tabs").addEventListener("click", e => { const b=e.target.closest("[data-tab]"); if (b) show(b.dataset.tab, true); });
+}
+function show(id, scroll){
+  current = id;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", String(t.dataset.tab===id)));
+  document.querySelectorAll(".page").forEach(p=>p.hidden = p.id !== "page-"+id);
+  try { history.replaceState(null, "", "#"+id); } catch {}
+  if (scroll) { const t=$("#tabs"); const y = t.getBoundingClientRect().top + window.scrollY - 4; if (window.scrollY > y) window.scrollTo({top:y}); document.querySelector(`[data-tab="${id}"]`)?.scrollIntoView({inline:"center",block:"nearest"}); }
+}
+
+function fillWeeks(max, sel){ const s=$("#week"); s.innerHTML=""; for (let w=1; w<=max; w++){ const o=document.createElement("option"); o.value=w; o.textContent="Week "+w; if (w===sel) o.selected=true; s.appendChild(o); } }
+function notice(html){ const n=$("#notice"); if (!html){ n.hidden=true; return; } n.className="notice"; n.innerHTML=html; n.hidden=false; }
+
+/* ---------------- Sample league ---------------- */
+function sampleData(sel){
+  const r=rng(7), W=5, shown=Math.min(Math.max(1,sel||W),W);
+  const teamNames=["Gridiron Goblins","Fourth & Long Island","The Waiver Wire Wizards","Kickin' Assets","Bye Week Blues","Punt Intended","Hail Mary Poppins","Red Zone Rejects","Tush Push Cartel","Bench Warrant"];
+  const owners=["mike_d","jess.r","bigtone","kfrank","rosie88","dlo","the_commish","sammyb","nate","kp"];
+  const first=["Jalen","Marcus","Tyrell","Cole","Dante","Andre","Bryce","Miles","Khalil","Trey","Isaiah","Darius","Cam","Jaylen","Rashid","Owen","Luke","Malik","Terrell","Quincy"];
+  const last=["Okafor","Brandt","Whitfield","Sutter","Harlow","Vance","Mercer","Doyle","Pryor","Castell","Ambrose","Fenwick","Lyle","Rowan","Kessler","Dunmore","Talbot","Quarles","Rhett","Ashby"];
+  const nfl=["BUF","KC","PHI","DAL","SF","DET","MIA","BAL","CIN","GB","LAR","SEA"];
+  const players={}, pool={QB:[],RB:[],WR:[],TE:[],K:[],DEF:[]};
+  let id=1000; const counts={QB:22,RB:55,WR:65,TE:22,K:12,DEF:12}, base={QB:18,RB:11,WR:11,TE:7,K:8,DEF:7};
+  for (const [pos,n] of Object.entries(counts)) for (let i=0;i<n;i++){
+    const pid=pos==="DEF"?nfl[i]:String(id++);
+    const name=pos==="DEF"?`${nfl[i]} Defense`:`${first[Math.floor(r()*first.length)]} ${last[Math.floor(r()*last.length)]}`;
+    players[pid]=[name,pos,pos==="DEF"?nfl[i]:nfl[Math.floor(r()*nfl.length)],pos];
+    pool[pos].push({pid,talent:base[pos]*(.6+r()*.9)});
+  }
+  for (const k in pool) pool[k].sort((a,b)=>b.talent-a.talent);
+  const users=owners.map((o,i)=>({user_id:"u"+i,display_name:o,metadata:{team_name:teamNames[i]}}));
+  const take={QB:2,RB:5,WR:6,TE:2,K:1,DEF:1}, rosters=[];
+  for (let t=0;t<10;t++){ const ps=[]; for (const [pos,n] of Object.entries(take)) for (let k=0;k<n;k++) ps.push(pool[pos][t+10*k]?.pid||pool[pos][k].pid); rosters.push({roster_id:t+1,owner_id:"u"+t,players:[...new Set(ps)]}); }
+  const talent=Object.fromEntries(Object.values(pool).flat().map(x=>[x.pid,x.talent]));
+  const rp=["QB","RB","RB","WR","WR","TE","FLEX","K","DEF","BN","BN","BN","BN","BN","BN","BN"];
+  const ids=[1,2,3,4,5,6,7,8,9,10], sched=[];
+  for (let w=0;w<W+1;w++){ const rest=ids.slice(1), arr=[ids[0],...rest.map((_,i)=>rest[(i+w)%rest.length])], pairs=[]; for (let i=0;i<5;i++) pairs.push([arr[i],arr[9-i]]); sched.push(pairs); }
+  const matchups={}, proj={};
+  for (let w=1;w<=W+1;w++){
+    matchups[w]=[]; proj[w]={};
+    for (const pid in talent) proj[w][pid]={pts_std:Math.round(talent[pid]*(.85+r()*.3)*10)/10};
+    sched[w-1].forEach(([a,b],mi)=>{ for (const rid of [a,b]){
+      const ro=rosters[rid-1], pts={};
+      for (const pid of ro.players) pts[pid]= w>W?0:Math.max(0,Math.round((talent[pid]*(.25+r()*1.5)+(r()<.06?talent[pid]*1.4:0))*100)/100);
+      const byPos=pos=>ro.players.filter(p=>players[p][1]===pos);
+      const starters=[byPos("QB")[0],...byPos("RB").slice(0,2),...byPos("WR").slice(0,2),byPos("TE")[0],(r()<.5?byPos("RB")[2]:byPos("WR")[2]),byPos("K")[0],byPos("DEF")[0]];
+      matchups[w].push({roster_id:rid,matchup_id:mi+1,points:w>W?0:Math.round(sum(starters.map(p=>pts[p]))*100)/100,starters,players:ro.players,players_points:pts});
+    }});
+  }
+  const fa=pool.WR.slice(-4).concat(pool.RB.slice(-3));
+  const tx=[
+    {type:"trade",status:"complete",roster_ids:[3,8],adds:{[rosters[2].players[3]]:8,[rosters[7].players[8]]:3},drops:{},draft_picks:[{season:"2027",round:3,roster_id:8,owner_id:3,previous_owner_id:8}],waiver_budget:[],created:5},
+    {type:"waiver",status:"complete",roster_ids:[5],adds:{[fa[0].pid]:5},drops:{[rosters[4].players[14]]:5},settings:{waiver_bid:23},created:4},
+    {type:"waiver",status:"failed",roster_ids:[9],adds:{[fa[0].pid]:9},drops:null,settings:{waiver_bid:17},metadata:{notes:"Outbid by another team."},created:4},
+    {type:"waiver",status:"complete",roster_ids:[1],adds:{[fa[4].pid]:1},drops:{[rosters[0].players[7]]:1},settings:{waiver_bid:6},created:3},
+    {type:"free_agent",status:"complete",roster_ids:[7],adds:{[fa[2].pid]:7},drops:{[rosters[6].players[15]]:7},created:2}
+  ];
+  const ed=new Date("2026-09-09T12:00:00"); ed.setDate(ed.getDate()+7*(shown-1)+6);
+  return {state:{season:"2026",week:W,season_type:"regular"}, league:{name:"Sample League",season:"2026",roster_positions:rp,scoring_settings:{rec:0},settings:{playoff_week_start:15}},
+    users, rosters, matchups, tx: shown===W?tx:[], players, projW:proj[shown], projNext:proj[shown+1], week:shown, maxWeek:W, leagueId:"sample", editionDate:ed, live:false};
+}
+
+/* ---------------- Snapshot (used when this page can't reach Sleeper, e.g. inside Claude's preview) ---------------- */
+function snapshotData(week){
+  const el = document.getElementById("snapshot"); if (!el) return null;
+  let s; try { s = JSON.parse(el.textContent); } catch { return null; }
+  const maxWeek = s.state.week;
+  const takenDay = new Date(s.taken).toLocaleString("en-US",{timeZone:"America/New_York",weekday:"short"});
+  const def = ["Tue","Wed"].includes(takenDay) ? maxWeek : Math.max(1, maxWeek-1);
+  const W = Math.min(Math.max(1, week || def), maxWeek);
+  const matchups = {}; for (const w in s.matchups) matchups[w] = s.matchups[w].map(m => ({...m, players:Object.keys(m.players_points||{})}));
+  const proj = w => Object.fromEntries(Object.entries(s.proj[w]||{}).map(([k,v]) => [k,{pts_ppr:v}]));
+  const ed = new Date(s.state.season_start_date+"T12:00:00"); ed.setDate(ed.getDate()+7*(W-1)+6);
+  return {state:s.state, league:s.league, users:s.users, rosters:s.rosters, matchups, tx:s.tx[W]||[], players:s.players, projW:proj(W), projNext:proj(W+1),
+    week:W, maxWeek, leagueId:SNAP_LEAGUE, editionDate:ed, live:true, snapshot:true, taken:new Date(s.taken), inProgress: W===maxWeek && !["Tue","Wed"].includes(takenDay)};
+}
+const SNAP_LEAGUE = "1355333984036327424";
+
+/* ---------------- Boot ---------------- */
+let running=0;
+async function print(leagueId, week){
+  const job=++running;
+  if (!leagueId){
+    const d=sampleData(week); fillWeeks(d.maxWeek,d.week); render(buildModel(d));
+    notice(`<strong>Sample edition.</strong> Every team and player here is made up, and photos appear once a real league is loaded. Enter your Sleeper league ID and press <b>Print it</b>. The ID is the long number in your league's address on sleeper.com.`);
+    return;
+  }
+  $("#edition").innerHTML=`<div class="status">Pulling Week ${week||""} from Sleeper and setting type…</div>`;
+  try {
+    const d=await fetchLeague(leagueId, week); if (job!==running) return;
+    fillWeeks(d.maxWeek,d.week); render(buildModel(d)); notice(null); store.set("gazette_league", leagueId);
+  } catch(e){
+    if (job!==running) return;
+    const snap = e instanceof TypeError && leagueId===SNAP_LEAGUE ? snapshotData(week) : null;
+    if (snap) {
+      fillWeeks(snap.maxWeek, snap.week); render(buildModel(snap));
+      const when = snap.taken.toLocaleString("en-US",{timeZone:"America/New_York",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+      notice(`<strong>Snapshot edition.</strong> Your league's results as of ${esc(when)}.${snap.inProgress?" Week "+snap.week+" was still being played when this was printed, so its scores aren't final.":""} This preview can't reach Sleeper on its own, so photos show as initials here. The hosted copy updates live and shows photos.`);
+      return;
+    }
+    const d=sampleData(); fillWeeks(d.maxWeek,d.week); render(buildModel(d));
+    notice(e instanceof TypeError
+      ? `<strong>Couldn't reach Sleeper from here.</strong> This preview is sandboxed, so it's showing a made-up sample league. Open the page from your own host (Netlify, GitHub Pages) or straight from a computer's browser to load your league.`
+      : `<strong>That didn't work.</strong> ${esc(e.message)} Check the league ID and try again. Showing the sample edition for now.`);
+  }
+}
+buildTabs();
+const params=new URLSearchParams(location.search);
+const initialId=params.get("league")||CONFIG.leagueId||store.get("gazette_league")||"";
+$("#league-id").value=initialId;
+$("#controls").addEventListener("submit", e=>{ e.preventDefault(); const id=$("#league-id").value.trim(); print(id, id===(store.get("gazette_league")||"") ? parseInt($("#week").value,10) : null); });
+$("#week").addEventListener("change", ()=>print($("#league-id").value.trim(), parseInt($("#week").value,10)));
+print(initialId, parseInt(params.get("week"),10)||null);
+})();
+</script>
